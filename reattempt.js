@@ -25,9 +25,11 @@ const logAxiosError = (error) => {
   console.log(error.config);
 };
 
+// "/:publicIdentifier/withdraw/transfer/:transferId"
+
 const run = async () => {
   const test = bscAttempted[0];
-  for (const transferId of test) {
+  for (const transferId of [test]) {
     let commitment;
     console.log("testing with transfer", transferId);
     try {
