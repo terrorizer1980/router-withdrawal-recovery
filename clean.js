@@ -19,7 +19,7 @@ function writeCleanQueryFile(filename) {
   const ext = filename.startsWith(".") ? split[2] : split[1];
   const prefix = filename.startsWith(".") ? "." : "";
   const cleanName = prefix + name + "-processed." + ext;
-  fs.writeFileSync(cleanName, contents.toString());
+  fs.writeFileSync(cleanName, "'" + contents.join("','") + "'");
 }
 
 const bsc = cleanQueryRecords("./sql-output/bsc-not-mined.txt");
