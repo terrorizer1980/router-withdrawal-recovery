@@ -29,6 +29,7 @@ const run = async () => {
   const test = bscAttempted[0];
   for (const transferId of test) {
     let commitment;
+    console.log("testing with transfer", transferId);
     try {
       const res = await axios.get(
         `${baseUrl}/${routerIdentitifer}/withdraw/transfer/${transferId}`
