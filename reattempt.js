@@ -27,14 +27,14 @@ const logAxiosError = (error) => {
 
 const run = async () => {
   const test = bscAttempted[0];
-  for (const transferId of bscAttempted) {
-    let transfer;
+  for (const transferId of test) {
+    let commitment;
     try {
-      const transferRes = await axios.get(
-        `${baseUrl}/${routerIdentitifer}/transfers/${transferId}`
+      const res = await axios.get(
+        `${baseUrl}/${routerIdentitifer}/withdraw/transfer/${transferId}`
       );
-      transfer = transferRes.data;
-      console.log("transfer", transfer);
+      commitment = res.data;
+      console.log("commitment", commitment);
     } catch (e) {
       console.log("Error fetching transfer", transferId);
       logAxiosError(e);
