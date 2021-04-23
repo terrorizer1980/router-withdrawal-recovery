@@ -10,7 +10,7 @@ const run = async () => {
         transferId,
       });
       console.log(`Retried transfer: `, res.data);
-    } catch (e) {
+    } catch (error) {
       console.log(`Error on transfer: ${transferId}`);
       if (error.response) {
         // The request was made and the server responded with a status code
