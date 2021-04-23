@@ -1,5 +1,5 @@
-import axios from "axios";
-import { bsc } from "./bsc";
+const axios = require("axios");
+const { bsc } = require("./bsc");
 
 const run = async () => {
   for (const transferId of bsc) {
