@@ -30,7 +30,7 @@ const run = async () => {
       }
       console.log(error.config);
     }
-    await new Promise((res) => setTimeout(() => res(), 5000));
+    await new Promise((res) => setTimeout(() => res(), 2000));
   }
 };
 
