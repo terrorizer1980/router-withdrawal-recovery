@@ -1,8 +1,9 @@
 const axios = require("axios");
 const { bsc } = require("./bsc");
+const { xdai } = require("./xdai");
 
 const run = async () => {
-  for (const transferId of bsc) {
+  for (const transferId of xdai) {
     console.log(`Retrying transfer: ${transferId}`);
     try {
       const res = await axios.post("http://localhost:8002/withdraw/retry", {
