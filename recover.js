@@ -9,7 +9,7 @@ const run = async () => {
       transferId,
     });
     console.log(`Retried transfer: `, res.data);
-    await new Promise<void>((res) => setTimeout(() => res(), 1000));
+    await new Promise((res) => setTimeout(() => res(), 1000));
   }
 };
 
