@@ -31,7 +31,7 @@ const logAxiosError = (error) => {
 
 const run = async () => {
   const provider = new providers.JsonRpcProvider(process.env.PROVIDER_URL);
-  for (const transferId of maticAttempted) {
+  for (const transferId of xdaiAttempted) {
     let commitment;
     try {
       const res = await axios.get(
@@ -83,7 +83,7 @@ const run = async () => {
       }
       console.log(error.config);
     }
-    await new Promise((res) => setTimeout(() => res(), 2000));
+    await new Promise((res) => setTimeout(() => res(), 5000));
   }
 };
 
