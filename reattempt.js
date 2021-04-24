@@ -30,16 +30,13 @@ const logAxiosError = (error) => {
 
 const run = async () => {
   const provider = new providers.JsonRpcProvider(process.env.PROVIDER_URL);
-  const test = bscAttempted[0];
-  for (const transferId of [test]) {
+  for (const transferId of bscAttempted) {
     let commitment;
-    console.log("testing with transfer", transferId);
     try {
       const res = await axios.get(
         `${baseUrl}/${routerIdentitifer}/withdraw/transfer/${transferId}`
       );
       commitment = res.data;
-      console.log("commitment", commitment);
     } catch (e) {
       console.log("Error fetching transfer", transferId);
       logAxiosError(e);
