@@ -30,7 +30,7 @@ const logAxiosError = (error) => {
 
 const run = async () => {
   const provider = new providers.JsonRpcProvider(process.env.PROVIDER_URL);
-  for (const transferId of bscAttempted) {
+  for (const transferId of xdaiAttempted) {
     let commitment;
     try {
       const res = await axios.get(
