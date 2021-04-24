@@ -46,7 +46,7 @@ const run = async () => {
         "Commitment has existing transaction hash",
         commitment.transactionHash
       );
-      const receipt = provider.getTransactionReceipt(
+      const receipt = await provider.getTransactionReceipt(
         commitment.transactionHash
       );
       if (receipt) {
