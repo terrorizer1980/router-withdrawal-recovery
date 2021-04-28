@@ -31,7 +31,7 @@ const logAxiosError = (error) => {
 
 const run = async () => {
   const provider = new providers.JsonRpcProvider(process.env.PROVIDER_URL);
-  for (const transferId of bsc.unmined.user) {
+  for (const transferId of matic.unmined.user) {
     let commitment;
     try {
       const res = await axios.get(
