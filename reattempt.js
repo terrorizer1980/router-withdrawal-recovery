@@ -32,7 +32,7 @@ const logAxiosError = (error) => {
 
 const run = async () => {
   const provider = new providers.JsonRpcProvider(process.env.PROVIDER_URL);
-  for (const transferId of matic.unsubmitted.router) {
+  for (const transferId of bsc.unsubmitted.router) {
     let commitment;
     try {
       const res = await axios.get(
