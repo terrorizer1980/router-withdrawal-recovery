@@ -1,6 +1,8 @@
 const axios = require("axios");
-const bsc = require("./input/bsc");
 const { providers } = require("ethers");
+
+const bsc = require("./input/bsc");
+const matic = require("./input/matic");
 
 const routerIdentitifer =
   "vector892GMZ3CuUkpyW8eeXfW2bt5W73TWEXtgV71nphXUXAmpncnj8";
@@ -29,7 +31,7 @@ const logAxiosError = (error) => {
 
 const run = async () => {
   const provider = new providers.JsonRpcProvider(process.env.PROVIDER_URL);
-  for (const transferId of bsc.user) {
+  for (const transferId of matic.user) {
     let commitment;
     try {
       const res = await axios.get(
