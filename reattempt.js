@@ -1,7 +1,5 @@
 const axios = require("axios");
-const { bscAttempted } = require("./bsc");
-const { xdaiAttempted } = require("./xdai");
-const { maticAttempted } = require("./matic");
+const bsc = require("./input/bsc");
 const { providers } = require("ethers");
 
 const routerIdentitifer =
@@ -31,9 +29,7 @@ const logAxiosError = (error) => {
 
 const run = async () => {
   const provider = new providers.JsonRpcProvider(process.env.PROVIDER_URL);
-  for (const transferId of [
-    "0x12a4c461ad7b462a8cf2a7bcb11b0f93033e1aba3ed6d3c1b1b1582b96cef6d4",
-  ]) {
+  for (const transferId of bsc.user) {
     let commitment;
     try {
       const res = await axios.get(
@@ -59,7 +55,9 @@ const run = async () => {
     } else {
       console.log("Commitment missing hash");
     }
-    console.log(`Reattempting withdrawal: ${transferId}`);
+    console.log(
+      `Reattempting withdrawal: ${transferId} for channel ${commitment.channelAddress}`
+    );
     try {
       const res = await axios.post(`${baseUrl}/withdraw/retry`, {
         adminToken: process.env.ADMIN_TOKEN,
