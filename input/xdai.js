@@ -1,5 +1,5 @@
 module.exports = {
-  unsubmitted: {
+  unmined: {
     user: [
       "0xffad85491f29181c94c0de6fdfdb50232ebd6f172c54219bbd1b29af4a5085fc",
       "0x0dacf426fd899365eb06cb86b2743a5841b5732b4b1855f82ae030e7156f0d96",
