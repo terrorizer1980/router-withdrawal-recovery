@@ -63,7 +63,10 @@ const run = async () => {
         adminToken: process.env.ADMIN_TOKEN,
         transferId,
       });
-      console.log(`Retried transfer: `, res.data);
+      console.log(`Retried transfer: `, {
+        ...res.data,
+        channelAddress: commitment.channelAddress,
+      });
       const receipt = await provider.waitForTransaction(
         res.data.transactionHash
       );
