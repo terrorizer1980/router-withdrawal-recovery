@@ -3,6 +3,7 @@ const { providers } = require("ethers");
 
 const bsc = require("./input/bsc");
 const matic = require("./input/matic");
+const xdai = require("./input/xdai");
 
 const routerIdentitifer =
   "vector892GMZ3CuUkpyW8eeXfW2bt5W73TWEXtgV71nphXUXAmpncnj8";
