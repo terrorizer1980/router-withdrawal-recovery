@@ -1,4 +1,4 @@
-import { channels } from "./input/routerBalanceGt1000";
+import { channels } from "./input/toDispute";
 import axios from "axios";
 
 const routerIdentitifer =
