@@ -126,9 +126,8 @@ const run = async () => {
       // console.log("_line: ", _line);
       toWrite.push(_line);
     }
-
-    writeFileSync("offchain.txt", toWrite.join("\n"));
   }
+  writeFileSync("offchain.txt", toWrite.join("\n"));
   console.log("To write:", toWrite.toString());
 };
 
