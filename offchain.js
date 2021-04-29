@@ -127,7 +127,7 @@ const run = async () => {
       toWrite.push(_line);
     }
   }
-  console.log("To write:", toWrite);
+  console.log("To write:", toWrite.toString());
 };
 
 run();
