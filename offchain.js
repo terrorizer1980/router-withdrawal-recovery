@@ -122,6 +122,15 @@ const run = async () => {
       const daiDiff = utils.formatUnits(
         BigNumber.from(dai).sub(utils.parseUnits(_dai, chainInfo.DAI.decimals))
       );
+
+      const inRange = (val) => {
+        return val > -1 && val < 1;
+      };
+
+      if (inRange(daiDiff) && inRange(usdcDiff) && inRange(usdtDiff)) {
+        continue;
+      }
+
       const _line = `${address},${chainId},${usdtDiff},${usdcDiff},${daiDiff},${
         channel.merkleRoot !== constants.HashZero
       }\n`;
@@ -130,7 +139,7 @@ const run = async () => {
     }
   }
   writeFileSync("offchain.txt", toWrite.join("\n"));
-  console.log("To write:", toWrite.toString());
+  console.log("To write:", toWrite.join("\n"));
 };
 
 run();
