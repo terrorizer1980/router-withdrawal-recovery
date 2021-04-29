@@ -75,11 +75,11 @@ const logAxiosError = (error) => {
 };
 
 const run = async () => {
-  let lineNumber = 0;
+  // let lineNumber = 0;
   const toWrite = [];
   for (const line of lines) {
-    console.log(`line ${lineNumber + 1} / ${lines.length}`);
-    lineNumber++;
+    // console.log(`line ${lineNumber + 1} / ${lines.length}`);
+    // lineNumber++;
 
     const [address, chainId, _usdt, _usdc, _dai] = line.split(",");
     if (!Object.keys(chains).includes(chainId)) {
@@ -111,22 +111,23 @@ const run = async () => {
     if (usdc !== _usdt || usdc !== _usdc || dai !== _dai) {
       const usdtDiff = utils.formatUnits(
         BigNumber.from(usdt).sub(
-          utils.parseUnits(usdt, chainInfo.USDT.decimals)
+          utils.parseUnits(_usdt, chainInfo.USDT.decimals)
         )
       );
       const usdcDiff = utils.formatUnits(
-        BigNumber.from(usdt).sub(
-          utils.parseUnits(usdt, chainInfo.USDC.decimals)
+        BigNumber.from(usdc).sub(
+          utils.parseUnits(_usdc, chainInfo.USDC.decimals)
         )
       );
       const daiDiff = utils.formatUnits(
-        BigNumber.from(usdt).sub(utils.parseUnits(usdt, chainInfo.DAI.decimals))
+        BigNumber.from(dai).sub(utils.parseUnits(_dai, chainInfo.DAI.decimals))
       );
       const _line = `${address},${chainId},${usdtDiff},${usdcDiff},${daiDiff}\n`;
-      console.log("_line: ", _line);
+      // console.log("_line: ", _line);
       toWrite.push(_line);
     }
   }
+  console.log("To write:", toWrite);
 };
 
 run();
