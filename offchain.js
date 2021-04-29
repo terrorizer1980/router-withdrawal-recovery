@@ -77,7 +77,7 @@ const run = async () => {
   let lineNumber = 0;
   const toWrite = [];
   for (const line of lines) {
-    console.log(`line ${lineNumber + 1} / ${outputLines.length}`);
+    console.log(`line ${lineNumber + 1} / ${lines.length}`);
     lineNumber++;
 
     const [address, chainId, _usdt, _usdc, _dai] = line.split(",");
