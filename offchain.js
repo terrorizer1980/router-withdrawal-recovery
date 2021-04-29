@@ -94,7 +94,7 @@ const run = async () => {
       );
       channel = res.data;
     } catch (e) {
-      console.log("Error fetching transfer", transferId);
+      console.log("Error fetching channel", address);
       logAxiosError(e);
       continue;
     }
