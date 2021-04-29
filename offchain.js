@@ -1,3 +1,4 @@
+const axios = require("axios");
 const { getBalanceForAssetId } = require("@connext/vector-utils");
 const { readFileSync, createWriteStream } = require("fs");
 const { BigNumber, constants, providers, utils } = require("ethers");
