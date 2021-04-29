@@ -1,6 +1,6 @@
 const axios = require("axios");
 const { getBalanceForAssetId } = require("@connext/vector-utils");
-const { readFileSync, createWriteStream } = require("fs");
+const { readFileSync, writeFileSync } = require("fs");
 const { BigNumber, constants, providers, utils } = require("ethers");
 
 const file = readFileSync("./clean.txt", "utf-8");
@@ -126,6 +126,8 @@ const run = async () => {
       // console.log("_line: ", _line);
       toWrite.push(_line);
     }
+
+    writeFileSync("offchain.txt", toWrite.join("\n"));
   }
   console.log("To write:", toWrite.toString());
 };
