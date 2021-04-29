@@ -122,7 +122,9 @@ const run = async () => {
       const daiDiff = utils.formatUnits(
         BigNumber.from(dai).sub(utils.parseUnits(_dai, chainInfo.DAI.decimals))
       );
-      const _line = `${address},${chainId},${usdtDiff},${usdcDiff},${daiDiff}\n`;
+      const _line = `${address},${chainId},${usdtDiff},${usdcDiff},${daiDiff},${
+        channel.merkleRoot !== constants.HashZero
+      }\n`;
       // console.log("_line: ", _line);
       toWrite.push(_line);
     }
