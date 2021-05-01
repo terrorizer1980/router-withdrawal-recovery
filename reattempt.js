@@ -55,7 +55,7 @@ const run = async () => {
         commitment.transactionHash
       );
       if (receipt) {
-        console.log("Tx submitted, ignoring", transferId);
+        console.log("Tx receipt available, ignoring", transferId);
         continue;
       }
     } else {
