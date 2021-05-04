@@ -109,7 +109,7 @@ const run = async () => {
   }
 
   // MATIC
-  provider = new providers.JsonRpcProvider(process.env.PROVIDER_URL);
+  provider = new providers.JsonRpcProvider(process.env.MATIC_PROVIDER_URL);
   for (const transferId of matic.unsubmitted.router) {
     console.log("Trying matic.unsubmitted.router");
     await retryWithdrawal(transferId, provider);
@@ -125,7 +125,7 @@ const run = async () => {
   }
 
   // XDAI
-  provider = new providers.JsonRpcProvider(process.env.PROVIDER_URL);
+  provider = new providers.JsonRpcProvider(process.env.XDAI_PROVIDER_URL);
   for (const transferId of xdai.unsubmitted.router) {
     console.log("Trying xdai.unsubmitted.router");
     await retryWithdrawal(transferId, provider);
