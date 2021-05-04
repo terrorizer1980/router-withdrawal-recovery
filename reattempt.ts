@@ -110,35 +110,35 @@ const run = async () => {
 
   // MATIC
   provider = new providers.JsonRpcProvider(process.env.MATIC_PROVIDER_URL);
+  console.log("Trying matic.unsubmitted.router");
   for (const transferId of matic.unsubmitted.router) {
-    console.log("Trying matic.unsubmitted.router");
     await retryWithdrawal(transferId, provider);
     await new Promise<void>((res) => setTimeout(() => res(), 1000));
-    console.log("Finished matic.unsubmitted.router");
   }
+  console.log("Finished matic.unsubmitted.router");
 
+  console.log("Trying matic.unmined.router");
   for (const transferId of matic.unmined.router) {
-    console.log("Trying matic.unmined.router");
     await retryWithdrawal(transferId, provider);
     await new Promise<void>((res) => setTimeout(() => res(), 1000));
-    console.log("Finished matic.unmined.router");
   }
+  console.log("Finished matic.unmined.router");
 
   // XDAI
   provider = new providers.JsonRpcProvider(process.env.XDAI_PROVIDER_URL);
+  console.log("Trying xdai.unsubmitted.router");
   for (const transferId of xdai.unsubmitted.router) {
-    console.log("Trying xdai.unsubmitted.router");
     await retryWithdrawal(transferId, provider);
     await new Promise<void>((res) => setTimeout(() => res(), 1000));
-    console.log("Finished xdai.unsubmitted.router");
   }
+  console.log("Finished xdai.unsubmitted.router");
 
+  console.log("Trying xdai.unmined.router");
   for (const transferId of xdai.unmined.router) {
-    console.log("Trying xdai.unmined.router");
     await retryWithdrawal(transferId, provider);
     await new Promise<void>((res) => setTimeout(() => res(), 1000));
-    console.log("Finished xdai.unmined.router");
   }
+  console.log("Finished xdai.unmined.router");
   //////////
 };
 
