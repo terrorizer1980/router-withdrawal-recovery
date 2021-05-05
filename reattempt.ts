@@ -94,19 +94,19 @@ const run = async () => {
   ////////// ROUTER
   // BSC
   let provider = new providers.JsonRpcProvider(process.env.BSC_PROVIDER_URL);
+  console.log("Trying bsc.unsubmitted.router");
   for (const transferId of bsc.unsubmitted.router) {
-    console.log("Trying bsc.unsubmitted.router");
     await retryWithdrawal(transferId, provider);
     await new Promise<void>((res) => setTimeout(() => res(), 1000));
-    console.log("Finished bsc.unsubmitted.router");
   }
+  console.log("Finished bsc.unsubmitted.router");
 
+  console.log("Trying bsc.unmined.router");
   for (const transferId of bsc.unmined.router) {
-    console.log("Trying bsc.unmined.router");
     await retryWithdrawal(transferId, provider);
     await new Promise<void>((res) => setTimeout(() => res(), 1000));
-    console.log("Finished bsc.unmined.router");
   }
+  console.log("Finished bsc.unmined.router");
 
   // MATIC
   provider = new providers.JsonRpcProvider(process.env.MATIC_PROVIDER_URL);
