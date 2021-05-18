@@ -101,6 +101,13 @@ const run = async () => {
   }
   console.log("Finished bsc.unsubmitted.router");
 
+  console.log("Trying bsc.unsubmitted.user");
+  for (const transferId of bsc.unsubmitted.user) {
+    await retryWithdrawal(transferId, provider);
+    await new Promise<void>((res) => setTimeout(() => res(), 1000));
+  }
+  console.log("Finished bsc.unsubmitted.user");
+
   console.log("Trying bsc.unmined.router");
   for (const transferId of bsc.unmined.router) {
     await retryWithdrawal(transferId, provider);
@@ -117,6 +124,13 @@ const run = async () => {
   }
   console.log("Finished matic.unsubmitted.router");
 
+  console.log("Trying matic.unsubmitted.user");
+  for (const transferId of matic.unsubmitted.user) {
+    await retryWithdrawal(transferId, provider);
+    await new Promise<void>((res) => setTimeout(() => res(), 1000));
+  }
+  console.log("Finished matic.unsubmitted.user");
+
   console.log("Trying matic.unmined.router");
   for (const transferId of matic.unmined.router) {
     await retryWithdrawal(transferId, provider);
@@ -132,6 +146,13 @@ const run = async () => {
     await new Promise<void>((res) => setTimeout(() => res(), 1000));
   }
   console.log("Finished xdai.unsubmitted.router");
+
+  console.log("Trying xdai.unsubmitted.user");
+  for (const transferId of xdai.unsubmitted.user) {
+    await retryWithdrawal(transferId, provider);
+    await new Promise<void>((res) => setTimeout(() => res(), 1000));
+  }
+  console.log("Finished xdai.unsubmitted.user");
 
   console.log("Trying xdai.unmined.router");
   for (const transferId of xdai.unmined.router) {
