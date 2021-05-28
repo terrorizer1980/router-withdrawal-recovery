@@ -1,10 +1,11 @@
 import axios from "axios";
-import { providers } from "ethers";
+import { constants, providers } from "ethers";
 import { config as dotEnvConfig } from "dotenv";
 
 import bsc from "./input/bsc";
 import matic from "./input/matic";
 import xdai from "./input/xdai";
+import ftm from "./input/ftm";
 
 dotEnvConfig();
 
@@ -34,6 +35,7 @@ const logAxiosError = (error: any) => {
 };
 
 const retryWithdrawal = async (
+  channelAddress: string,
   transferId: string,
   provider: providers.JsonRpcProvider
 ) => {
@@ -59,6 +61,9 @@ const retryWithdrawal = async (
       "Commitment has existing transaction hash",
       commitment.transactionHash
     );
+    if (commitment.transactionHash === constants.HashZero) {
+      return;
+    }
     const receipt = await provider.getTransactionReceipt(
       commitment.transactionHash
     );
@@ -74,15 +79,14 @@ const retryWithdrawal = async (
   );
   try {
     const res = await axios.post(`${baseUrl}/withdraw/retry`, {
-      adminToken: process.env.ADMIN_TOKEN,
+      publicIdentifier: routerIdentitifer,
+      channelAddress,
       transferId,
     });
     console.log(`Retried transfer: `, {
       ...res.data,
       channelAddress: commitment.channelAddress,
     });
-    const receipt = await provider.waitForTransaction(res.data.transactionHash);
-    console.log(`Got receipt for tx ${receipt.transactionHash}`);
   } catch (error) {
     console.log(`Error on transfer: ${transferId}`);
     logAxiosError(error);
@@ -95,22 +99,22 @@ const run = async () => {
   // BSC
   let provider = new providers.JsonRpcProvider(process.env.BSC_PROVIDER_URL);
   console.log("Trying bsc.unsubmitted.router");
-  for (const transferId of bsc.unsubmitted.router) {
-    await retryWithdrawal(transferId, provider);
+  for (const [channelAddress, transferId] of bsc.unsubmitted.router) {
+    await retryWithdrawal(channelAddress, transferId, provider);
     await new Promise<void>((res) => setTimeout(() => res(), 1000));
   }
   console.log("Finished bsc.unsubmitted.router");
 
   console.log("Trying bsc.unsubmitted.user");
-  for (const transferId of bsc.unsubmitted.user) {
-    await retryWithdrawal(transferId, provider);
+  for (const [channelAddress, transferId] of bsc.unsubmitted.user) {
+    await retryWithdrawal(channelAddress, transferId, provider);
     await new Promise<void>((res) => setTimeout(() => res(), 1000));
   }
   console.log("Finished bsc.unsubmitted.user");
 
   console.log("Trying bsc.unmined.router");
-  for (const transferId of bsc.unmined.router) {
-    await retryWithdrawal(transferId, provider);
+  for (const [channelAddress, transferId] of bsc.unmined.router) {
+    await retryWithdrawal(channelAddress, transferId, provider);
     await new Promise<void>((res) => setTimeout(() => res(), 1000));
   }
   console.log("Finished bsc.unmined.router");
@@ -118,22 +122,22 @@ const run = async () => {
   // MATIC
   provider = new providers.JsonRpcProvider(process.env.MATIC_PROVIDER_URL);
   console.log("Trying matic.unsubmitted.router");
-  for (const transferId of matic.unsubmitted.router) {
-    await retryWithdrawal(transferId, provider);
+  for (const [channelAddress, transferId] of matic.unsubmitted.router) {
+    await retryWithdrawal(channelAddress, transferId, provider);
     await new Promise<void>((res) => setTimeout(() => res(), 1000));
   }
   console.log("Finished matic.unsubmitted.router");
 
   console.log("Trying matic.unsubmitted.user");
-  for (const transferId of matic.unsubmitted.user) {
-    await retryWithdrawal(transferId, provider);
+  for (const [channelAddress, transferId] of matic.unsubmitted.user) {
+    await retryWithdrawal(channelAddress, transferId, provider);
     await new Promise<void>((res) => setTimeout(() => res(), 1000));
   }
   console.log("Finished matic.unsubmitted.user");
 
   console.log("Trying matic.unmined.router");
-  for (const transferId of matic.unmined.router) {
-    await retryWithdrawal(transferId, provider);
+  for (const [channelAddress, transferId] of matic.unmined.router) {
+    await retryWithdrawal(channelAddress, transferId, provider);
     await new Promise<void>((res) => setTimeout(() => res(), 1000));
   }
   console.log("Finished matic.unmined.router");
@@ -141,25 +145,48 @@ const run = async () => {
   // XDAI
   provider = new providers.JsonRpcProvider(process.env.XDAI_PROVIDER_URL);
   console.log("Trying xdai.unsubmitted.router");
-  for (const transferId of xdai.unsubmitted.router) {
-    await retryWithdrawal(transferId, provider);
+  for (const [channelAddress, transferId] of xdai.unsubmitted.router) {
+    await retryWithdrawal(channelAddress, transferId, provider);
     await new Promise<void>((res) => setTimeout(() => res(), 1000));
   }
   console.log("Finished xdai.unsubmitted.router");
 
   console.log("Trying xdai.unsubmitted.user");
-  for (const transferId of xdai.unsubmitted.user) {
-    await retryWithdrawal(transferId, provider);
+  for (const [channelAddress, transferId] of xdai.unsubmitted.user) {
+    await retryWithdrawal(channelAddress, transferId, provider);
     await new Promise<void>((res) => setTimeout(() => res(), 1000));
   }
   console.log("Finished xdai.unsubmitted.user");
 
   console.log("Trying xdai.unmined.router");
-  for (const transferId of xdai.unmined.router) {
-    await retryWithdrawal(transferId, provider);
+  for (const [channelAddress, transferId] of xdai.unmined.router) {
+    await retryWithdrawal(channelAddress, transferId, provider);
     await new Promise<void>((res) => setTimeout(() => res(), 1000));
   }
   console.log("Finished xdai.unmined.router");
+
+  // FTM
+  provider = new providers.JsonRpcProvider(process.env.FTM_PROVIDER_URL);
+  console.log("Trying ftm.unsubmitted.router");
+  for (const [channelAddress, transferId] of ftm.unsubmitted.router) {
+    await retryWithdrawal(channelAddress, transferId, provider);
+    await new Promise<void>((res) => setTimeout(() => res(), 1000));
+  }
+  console.log("Finished ftm.unsubmitted.router");
+
+  console.log("Trying ftm.unsubmitted.user");
+  for (const [channelAddress, transferId] of ftm.unsubmitted.user) {
+    await retryWithdrawal(channelAddress, transferId, provider);
+    await new Promise<void>((res) => setTimeout(() => res(), 1000));
+  }
+  console.log("Finished ftm.unsubmitted.user");
+
+  console.log("Trying ftm.unmined.router");
+  for (const [channelAddress, transferId] of ftm.unmined.router) {
+    await retryWithdrawal(channelAddress, transferId, provider);
+    await new Promise<void>((res) => setTimeout(() => res(), 1000));
+  }
+  console.log("Finished ftm.unmined.router");
   //////////
 };
 
