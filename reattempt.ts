@@ -111,7 +111,7 @@ const run = async () => {
   console.log("Trying bsc.unsubmitted.user");
   count = 0;
   for (const [transferId, channelAddress] of bsc.unsubmitted.user) {
-    console.log(`${count} / ${bsc.unsubmitted.router.length}`);
+    console.log(`${count} / ${bsc.unsubmitted.user.length}`);
     count += 1;
     await retryWithdrawal(channelAddress, transferId, provider);
     await new Promise<void>((res) => setTimeout(() => res(), 1000));
@@ -121,7 +121,7 @@ const run = async () => {
   console.log("Trying bsc.unmined.router");
   count = 0;
   for (const [transferId, channelAddress] of bsc.unmined.router) {
-    console.log(`${count} / ${bsc.unsubmitted.router.length}`);
+    console.log(`${count} / ${bsc.unmined.router.length}`);
     count += 1;
     await retryWithdrawal(channelAddress, transferId, provider);
     await new Promise<void>((res) => setTimeout(() => res(), 1000));
@@ -133,7 +133,7 @@ const run = async () => {
   console.log("Trying matic.unsubmitted.router");
   count = 0;
   for (const [transferId, channelAddress] of matic.unsubmitted.router) {
-    console.log(`${count} / ${bsc.unsubmitted.router.length}`);
+    console.log(`${count} / ${matic.unsubmitted.router.length}`);
     count += 1;
     await retryWithdrawal(channelAddress, transferId, provider);
     await new Promise<void>((res) => setTimeout(() => res(), 1000));
@@ -143,7 +143,7 @@ const run = async () => {
   console.log("Trying matic.unsubmitted.user");
   count = 0;
   for (const [transferId, channelAddress] of matic.unsubmitted.user) {
-    console.log(`${count} / ${bsc.unsubmitted.router.length}`);
+    console.log(`${count} / ${matic.unsubmitted.user.length}`);
     count += 1;
     await retryWithdrawal(channelAddress, transferId, provider);
     await new Promise<void>((res) => setTimeout(() => res(), 1000));
@@ -153,7 +153,7 @@ const run = async () => {
   console.log("Trying matic.unmined.router");
   count = 0;
   for (const [transferId, channelAddress] of matic.unmined.router) {
-    console.log(`${count} / ${bsc.unsubmitted.router.length}`);
+    console.log(`${count} / ${matic.unmined.router.length}`);
     count += 1;
     await retryWithdrawal(channelAddress, transferId, provider);
     await new Promise<void>((res) => setTimeout(() => res(), 1000));
@@ -165,7 +165,7 @@ const run = async () => {
   console.log("Trying xdai.unsubmitted.router");
   count = 0;
   for (const [transferId, channelAddress] of xdai.unsubmitted.router) {
-    console.log(`${count} / ${bsc.unsubmitted.router.length}`);
+    console.log(`${count} / ${xdai.unsubmitted.router.length}`);
     count += 1;
     await retryWithdrawal(channelAddress, transferId, provider);
     await new Promise<void>((res) => setTimeout(() => res(), 1000));
@@ -175,7 +175,7 @@ const run = async () => {
   console.log("Trying xdai.unsubmitted.user");
   count = 0;
   for (const [transferId, channelAddress] of xdai.unsubmitted.user) {
-    console.log(`${count} / ${bsc.unsubmitted.router.length}`);
+    console.log(`${count} / ${xdai.unsubmitted.user.length}`);
     count += 1;
     await retryWithdrawal(channelAddress, transferId, provider);
     await new Promise<void>((res) => setTimeout(() => res(), 1000));
@@ -185,7 +185,7 @@ const run = async () => {
   console.log("Trying xdai.unmined.router");
   count = 0;
   for (const [transferId, channelAddress] of xdai.unmined.router) {
-    console.log(`${count} / ${bsc.unsubmitted.router.length}`);
+    console.log(`${count} / ${xdai.unmined.router.length}`);
     count += 1;
     await retryWithdrawal(channelAddress, transferId, provider);
     await new Promise<void>((res) => setTimeout(() => res(), 1000));
@@ -197,7 +197,7 @@ const run = async () => {
   console.log("Trying ftm.unsubmitted.router");
   count = 0;
   for (const [transferId, channelAddress] of ftm.unsubmitted.router) {
-    console.log(`${count} / ${bsc.unsubmitted.router.length}`);
+    console.log(`${count} / ${ftm.unsubmitted.router.length}`);
     count += 1;
     await retryWithdrawal(channelAddress, transferId, provider);
     await new Promise<void>((res) => setTimeout(() => res(), 1000));
@@ -207,7 +207,7 @@ const run = async () => {
   console.log("Trying ftm.unsubmitted.user");
   count = 0;
   for (const [transferId, channelAddress] of ftm.unsubmitted.user) {
-    console.log(`${count} / ${bsc.unsubmitted.router.length}`);
+    console.log(`${count} / ${ftm.unsubmitted.user.length}`);
     count += 1;
     await retryWithdrawal(channelAddress, transferId, provider);
     await new Promise<void>((res) => setTimeout(() => res(), 1000));
@@ -217,7 +217,7 @@ const run = async () => {
   console.log("Trying ftm.unmined.router");
   count = 0;
   for (const [transferId, channelAddress] of ftm.unmined.router) {
-    console.log(`${count} / ${bsc.unsubmitted.router.length}`);
+    console.log(`${count} / ${ftm.unmined.router.length}`);
     count += 1;
     await retryWithdrawal(channelAddress, transferId, provider);
     await new Promise<void>((res) => setTimeout(() => res(), 1000));
