@@ -7,6 +7,7 @@ const command =
 exec(command, (err, stdout, stderr) => {
   if (err) {
     // node couldn't execute the command
+    console.log(err);
     return;
   }
 
