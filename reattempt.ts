@@ -1,19 +1,42 @@
 import axios from "axios";
 import { constants, providers } from "ethers";
+import { TransactionReceipt } from "ethers/providers";
 import { config as dotEnvConfig } from "dotenv";
 
 import bsc from "./input/bsc";
 import matic from "./input/matic";
 import xdai from "./input/xdai";
 import ftm from "./input/ftm";
+import fs from "fs";
+import { Client } from "pg";
 
 dotEnvConfig();
 
 console.log("config: ", process.env);
 
+const OUTPUT_DIR = "output";
 const routerIdentitifer =
   "vector52rjrwRFUkaJai2J4TrngZ6doTUXGZhizHmrZ6J15xVv4YFgFC";
 const baseUrl = "http://localhost:8002";
+
+type FlaggedTransfer = {
+  transactionHash: string;
+  channelAddress: string;
+  transferId: string;
+  receipt: TransactionReceipt | undefined;
+  error: string;
+};
+
+let flaggedTransfers: FlaggedTransfer[] = [];
+
+let rescuedFunds: { [chain: string]: number };
+
+const client = new Client({
+  host: "my.database-server.com",
+  port: 5334,
+  user: "database-user",
+  password: "secretpassword!!",
+});
 
 const logAxiosError = (error: any) => {
   if (error.response) {
@@ -56,6 +79,8 @@ const retryWithdrawal = async (
   console.log(
     `Checking withdrawal: ${transferId} for channel ${commitment.channelAddress}`
   );
+
+  let receipt: TransactionReceipt | undefined = undefined;
   if (commitment.transactionHash) {
     console.log(
       "Commitment has existing transaction hash",
@@ -64,15 +89,14 @@ const retryWithdrawal = async (
     if (commitment.transactionHash === constants.HashZero) {
       return;
     }
-    const receipt = await provider.getTransactionReceipt(
-      commitment.transactionHash
-    );
+    receipt = await provider.getTransactionReceipt(commitment.transactionHash);
     if (receipt) {
       console.log("Tx receipt available", transferId);
     }
   } else {
     console.log("Commitment missing hash");
   }
+
   console.log(
     `Reattempting withdrawal: ${transferId} for channel ${commitment.channelAddress}`
   );
@@ -89,7 +113,35 @@ const retryWithdrawal = async (
   } catch (error) {
     console.log(`Error on transfer: ${transferId}`);
     logAxiosError(error);
+    flaggedTransfers.push({
+      transactionHash: commitment.transactionHash,
+      channelAddress: commitment.channelAddress,
+      transferId,
+      receipt,
+      error,
+    });
   }
+};
+
+/// Helper for dumping flagged transfer info into a json file.
+const saveFlagged = async (caseType: string) => {
+  if (flaggedTransfers.length === 0) {
+    console.log("No transfers were flagged, not saving.");
+    return;
+  }
+  // convert JSON object to a string
+  const data = JSON.stringify(flaggedTransfers);
+  // Write file to local disk in output directory.
+  const filename = `./${OUTPUT_DIR}/${caseType}.json`;
+  fs.writeFile(filename, data, "utf8", (err) => {
+    if (err) {
+      console.log(`Error writing file: ${err}`);
+    } else {
+      console.log(`File ${filename} written successfully.`);
+    }
+  });
+  // Clear flagged transfers.
+  flaggedTransfers = [];
 };
 
 // "/:publicIdentifier/withdraw/transfer/:transferId"
