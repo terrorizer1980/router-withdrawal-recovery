@@ -68,8 +68,7 @@ const retryWithdrawal = async (
       commitment.transactionHash
     );
     if (receipt) {
-      console.log("Tx receipt available, ignoring", transferId);
-      return;
+      console.log("Tx receipt available", transferId);
     }
   } else {
     console.log("Commitment missing hash");
