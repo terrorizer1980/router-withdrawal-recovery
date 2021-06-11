@@ -109,6 +109,20 @@ const retryWithdrawal = async (
   }
 };
 
+/// Helper to mkdir for output files if needed.
+const makeOutputDir = () => {
+  const dir = `./${OUTPUT_DIR}`;
+  try {
+    // Check if directory already exists.
+    if (!fs.existsSync(dir)) {
+      fs.mkdirSync(dir);
+      console.log(`Directory ${dir} is created.`);
+    }
+  } catch (err) {
+    console.log(err);
+  }
+};
+
 /// Helper for dumping flagged transfer info into a json file.
 const saveFlaggedTransfers = async (forCase: string) => {
   if (flaggedTransfers.length === 0) {
@@ -117,6 +131,7 @@ const saveFlaggedTransfers = async (forCase: string) => {
   }
   // convert JSON object to a string
   const data = JSON.stringify(flaggedTransfers);
+  makeOutputDir();
   // Write file to local disk in output directory.
   const filename = `./${OUTPUT_DIR}/${forCase}.json`;
   fs.writeFile(filename, data, "utf8", (err) => {
