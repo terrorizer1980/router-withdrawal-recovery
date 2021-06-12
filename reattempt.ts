@@ -171,8 +171,7 @@ const run = async () => {
   const result = await sendQuery(QUERY.GET.SINGLE_SIGNED);
   const records = result.split(/-\[ RECORD [0-9]+? \][-]+/);
   let data = records.map((r) => {
-    console.log(r);
-    return r.split("|");
+    return r.split("\n");
   });
 
   console.log(data);
