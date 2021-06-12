@@ -18,7 +18,6 @@ export const sendQuery = async (query: string): Promise<string> => {
         shell: "/bin/bash",
         encoding: "utf8",
         maxBuffer: 50 * 1024 * 1024,
-        timeout: 10000,
       });
       if (result) {
         resolve(result.toString());

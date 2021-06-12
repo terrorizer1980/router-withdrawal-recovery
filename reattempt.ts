@@ -169,13 +169,16 @@ const handleRetries = async (
 // "/:publicIdentifier/withdraw/transfer/:transferId"
 const run = async () => {
   const result = await sendQuery(QUERY.GET.SINGLE_SIGNED);
-  fs.writeFile("test.txt", result, "utf8", (err) => {
-    if (err) {
-      console.log(`Error writing file: ${err}`);
-    } else {
-      console.log(`File ${"text.txt"} written successfully.`);
-    }
-  });
+  const records = result.split(/-\[ RECORD [0-9]+? \][-]+?/);
+  console.log(records.slice(0, 10).join("\n"));
+
+  // fs.writeFile("test.txt", result, "utf8", (err) => {
+  //   if (err) {
+  //     console.log(`Error writing file: ${err}`);
+  //   } else {
+  //     console.log(`File ${"text.txt"} written successfully.`);
+  //   }
+  // });
   // console.log(result);
   return;
 
