@@ -20,7 +20,7 @@ export const sendQuery = async (query: string): Promise<string> => {
         maxBuffer: 50 * 1024 * 1024,
       });
       // console.log(process.stdout.read().toString());
-      console.log(result.stdout.toString());
+      console.log(result);
       if (result) {
         resolve(result.stdout.toString());
       } else {
