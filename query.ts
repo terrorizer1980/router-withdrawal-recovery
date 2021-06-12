@@ -13,16 +13,17 @@ export const sendQuery = async (query: string): Promise<string> => {
       query = query.replace(/'/g, `\\\'`);
       const command = `docker exec -t db-node bash -c $'psql vector --username=vector -c \\"${query}\\" -x'`;
       console.log("Sending command:\n", command, "\n");
-      const result = spawnSync(command, {
-        stdio: ["inherit", "inherit", "inherit"],
+      const result = execSync(command, {
+        // stdio: ["inherit", "pipe", "inherit"],
         shell: "/bin/bash",
         encoding: "utf8",
         maxBuffer: 50 * 1024 * 1024,
+        timeout: 10000,
       });
       // console.log(process.stdout.read().toString());
       console.log(result);
       if (result) {
-        resolve(result.stdout.toString());
+        resolve(result.toString());
       } else {
         throw new Error(`Result was not valid: ${result}`);
       }
