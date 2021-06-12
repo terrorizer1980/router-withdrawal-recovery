@@ -22,12 +22,13 @@ const execCommand = (
 
 const query = `select * from update limit 1;`;
 let count = 0;
+let capturedStdout = "";
 let child = spawn(
   "docker",
-  ["exec", "-t", "db-node", "bash", "-ci", "psql vector --username=vector"],
-  {
-    shell: true,
-  }
+  ["exec", "-t", "db-node", "bash", "-t"]
+  // {
+  //   shell: true,
+  // }
 );
 child.stdin.on("data", (data) => console.log("STDIN:", data.toString()));
 child.stdin.on("close", () => console.log("STDIN CLOSED"));
@@ -35,10 +36,16 @@ child.stderr.on("data", function(data) {
   console.error("STDERR:", data.toString());
 });
 child.stdout.on("data", function(data) {
-  const stdout = data.toString();
-  console.log(count, stdout);
+  const stdout: string = data.toString();
+  capturedStdout += stdout;
+  if (!capturedStdout.includes("#")) {
+    return;
+  }
+  console.log(count, capturedStdout);
+  capturedStdout = "";
   switch (count) {
     case 0:
+      execCommand(child, "psql vector --username=vector");
       break;
     case 1:
       execCommand(child, COMMAND.EXPANDED_DISPLAY);
