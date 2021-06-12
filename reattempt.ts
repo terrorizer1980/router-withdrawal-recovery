@@ -187,7 +187,7 @@ const run = async () => {
     return entry;
   });
   const filename = "single-signed.json";
-  fs.writeFile(filename, data, "utf8", (err) => {
+  fs.writeFile(filename, JSON.stringify(flaggedTransfers), "utf8", (err) => {
     if (err) {
       console.log(`Error writing file: ${err}`);
     } else {
