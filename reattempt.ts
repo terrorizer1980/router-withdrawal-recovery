@@ -172,9 +172,7 @@ const run = async () => {
   const records = result.split(/-\[ RECORD [0-9]+? \][-]+/);
   let data = [];
   for (const record of records) {
-    for (const line of record.split("\n")) {
-      console.log(line);
-    }
+    console.log(record.split("\n"));
     return;
   }
 
