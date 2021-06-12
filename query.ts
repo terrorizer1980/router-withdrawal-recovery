@@ -19,7 +19,7 @@ export const sendQuery = async (query: string): Promise<string> => {
         // encoding: "utf8",
         // maxBuffer: 50 * 1024 * 1024,
       });
-      console.log(process.stdout.toString());
+      console.log(process.stdout.read().toString());
       // console.log(result.stderr.toString());
       if (result) {
         resolve(result.toString());
