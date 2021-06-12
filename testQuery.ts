@@ -22,9 +22,13 @@ const execCommand = (
 
 const query = `select * from update limit 1;`;
 let count = 0;
-let child = spawn(COMMAND.BASE, {
-  shell: true,
-});
+let child = spawn(
+  "docker",
+  ["exec", "-t", "db-node", "bash", "-ci", "psql vector --username=vector"],
+  {
+    shell: true,
+  }
+);
 child.stdin.on("data", (data) => console.log("STDIN:", data.toString()));
 child.stdin.on("close", () => console.log("STDIN CLOSED"));
 child.stderr.on("data", function(data) {
