@@ -16,19 +16,6 @@ const execCommand = (command: string) => {
   });
 };
 
-const query = `select * from update limit 1;`;
-let count = 0;
-let capturedStdout = "";
-let child = spawnSync(
-  "docker",
-  ["exec", "-it", "db-node", "bash", "-it"],
-  {
-    stdio: "inherit",
-  }
-  // {
-  //   shell: true,
-  // }
-);
 process.stdin.on("data", (data) => console.log("STDIN:", data.toString()));
 process.stdin.on("close", () => console.log("STDIN CLOSED"));
 process.stderr.on("data", function(data) {
@@ -57,6 +44,21 @@ process.stdout.on("data", function(data) {
   }
   count += 1;
 });
+
+const query = `select * from update limit 1;`;
+let count = 0;
+let capturedStdout = "";
+let child = spawnSync(
+  "docker",
+  ["exec", "-it", "db-node", "bash", "-it"],
+  {
+    stdio: "inherit",
+  }
+  // {
+  //   shell: true,
+  // }
+);
+
 // child.on("exit", function(exitCode) {
 //   console.log("Child exited with code: " + exitCode);
 // });
