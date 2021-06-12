@@ -171,7 +171,16 @@ const run = async () => {
   const result = await sendQuery(QUERY.GET.SINGLE_SIGNED);
   const records = result.split(/-\[ RECORD [0-9]+? \][-]+/);
   let data = records.map((r) => {
-    return r.split("\n");
+    let entry = {};
+    const lines = r.split("\n");
+    for (let line in lines) {
+      if (line.length === 0) {
+        continue;
+      }
+      const [key, value] = line.split(" | ");
+      entry[key] = value;
+    }
+    return entry;
   });
 
   console.log(data);
@@ -186,11 +195,11 @@ const run = async () => {
   // console.log(result);
   return;
 
-  for (const chainName of Object.keys(HANDLED_CHAINS)) {
+  for (let chainName of Object.keys(HANDLED_CHAINS)) {
     const envVar = `${chainName.toUpperCase}_PROVIDER_URL`;
     const provider = new providers.JsonRpcProvider(process.env[envVar]);
     const chain = HANDLED_CHAINS[chainName];
-    for (const option of HANDLED_OPTIONS) {
+    for (let option of HANDLED_OPTIONS) {
       await handleRetries(provider, chain, option.forCase, option.forTarget);
     }
   }
