@@ -7,7 +7,6 @@ const COMMAND = {
 };
 
 const execCommand = (command: string) => {
-  console.log("Writable?", child.stdin.writable);
   const writeCommand = command + "\r\n";
   console.log("Writing", writeCommand);
   process.stdin.write(writeCommand, (error) => {
@@ -54,7 +53,6 @@ process.stdout.on("data", function(data) {
     //   execCommand(child, query);
     //   break;
     default:
-      child.kill();
       break;
   }
   count += 1;
