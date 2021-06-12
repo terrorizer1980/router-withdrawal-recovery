@@ -10,7 +10,7 @@ const execCommand = (
   child: ChildProcessWithoutNullStreams,
   command: string
 ) => {
-  child.stdin.write(command + "\n");
+  child.stdin.write(command + "\r\n");
 };
 
 const query = `select * from update limit 1;`;
