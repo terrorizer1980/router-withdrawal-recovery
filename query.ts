@@ -1,4 +1,4 @@
-import { exec, execSync } from "child_process";
+import { exec, spawnSync } from "child_process";
 
 export const QUERY = {
   GET: {
@@ -13,15 +13,16 @@ export const sendQuery = async (query: string): Promise<string> => {
       query = query.replace(/'/g, `\\\'`);
       const command = `docker exec -t db-node bash -c $'psql vector --username=vector -c \\"${query}\\" -x'`;
       console.log("Sending command:\n", command, "\n");
-      const result = execSync(command, {
+      const result = spawnSync(command, {
         // stdio: ["inherit", "pipe", "inherit"],
         shell: "/bin/bash",
         encoding: "utf8",
         maxBuffer: 50 * 1024 * 1024,
       });
+      console.log(result.stdout.toString());
+      console.log(result.stderr.toString());
       if (result) {
-        console.log(result.toString());
-        resolve(result.toString());
+        resolve(result.stdout.toString());
       } else {
         throw new Error(`Result was not valid: ${result}`);
       }
