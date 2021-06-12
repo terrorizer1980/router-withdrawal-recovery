@@ -1,10 +1,10 @@
-import { TransactionReceipt } from "ethers/providers";
+import { providers } from "ethers";
 
 export type FlaggedTransfer = {
   transactionHash: string;
   channelAddress: string;
   transferId: string;
-  receipt: TransactionReceipt | undefined;
+  receipt: providers.TransactionReceipt | undefined;
   error: string;
 };
 

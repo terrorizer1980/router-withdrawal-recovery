@@ -1,8 +1,7 @@
 import axios from "axios";
 import { constants, providers } from "ethers";
-import { JsonRpcProvider, TransactionReceipt } from "ethers/providers";
 import { config as dotEnvConfig } from "dotenv";
-import fs from "fs";
+import * as fs from "fs";
 import {
   HANDLED_CHAINS,
   OUTPUT_DIR,
@@ -67,7 +66,7 @@ const retryWithdrawal = async (
     `Checking withdrawal: ${transferId} for channel ${commitment.channelAddress}`
   );
 
-  let receipt: TransactionReceipt | undefined = undefined;
+  let receipt: providers.TransactionReceipt | undefined = undefined;
   if (commitment.transactionHash) {
     console.log(
       "Commitment has existing transaction hash",
@@ -147,7 +146,7 @@ const saveFlaggedTransfers = async (forCase: string) => {
 };
 
 const handleRetries = async (
-  provider: JsonRpcProvider,
+  provider: providers.JsonRpcProvider,
   chain: ChainTransferData,
   forCase: "unsubmitted" | "unmined",
   forTarget: "user" | "router"
