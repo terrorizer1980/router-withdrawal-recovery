@@ -169,7 +169,13 @@ const handleRetries = async (
 // "/:publicIdentifier/withdraw/transfer/:transferId"
 const run = async () => {
   const result = await sendQuery(QUERY.GET.SINGLE_SIGNED);
-  console.log(result.split("\n")[0]);
+  fs.writeFile("test.txt", result, "utf8", (err) => {
+    if (err) {
+      console.log(`Error writing file: ${err}`);
+    } else {
+      console.log(`File ${"text.txt"} written successfully.`);
+    }
+  });
   return;
 
   for (const chainName of Object.keys(HANDLED_CHAINS)) {
