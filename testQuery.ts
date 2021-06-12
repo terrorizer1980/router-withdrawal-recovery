@@ -26,7 +26,7 @@ let child = spawn(COMMAND.BASE, {
 child.stderr.on("data", function(data) {
   console.error("STDERR:", data.toString());
 });
-child.stdout.once("data", function(data) {
+child.stdout.on("data", function(data) {
   const stdout = data.toString();
   console.log(count, stdout);
   switch (count) {
