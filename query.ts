@@ -14,10 +14,11 @@ export const sendQuery = async (query: string): Promise<string> => {
       const command = `docker exec -t db-node bash -c $'psql vector --username=vector -c \\"${query}\\" -x'`;
       console.log("Sending command:\n", command, "\n");
       const result = execSync(command, {
-        // stdio: ["pipe", "pipe", "pipe"],
+        stdio: ["pipe", "pipe", "pipe"],
         shell: "/bin/bash",
       });
       if (result) {
+        console.log(result.toString());
         resolve(result.toString());
       } else {
         throw new Error(`Result was not valid: ${result}`);
