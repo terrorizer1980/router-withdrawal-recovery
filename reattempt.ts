@@ -170,7 +170,13 @@ const handleRetries = async (
 const run = async () => {
   const result = await sendQuery(QUERY.GET.SINGLE_SIGNED);
   const records = result.split(/-\[ RECORD [0-9]+? \][-]+/);
-  console.log(records.slice(0, 10).join("\n"));
+  let data = [];
+  for (const record of records) {
+    for (const line of record.split("\n")) {
+      console.log(line);
+    }
+    return;
+  }
 
   // fs.writeFile("test.txt", result, "utf8", (err) => {
   //   if (err) {
