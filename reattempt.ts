@@ -178,21 +178,22 @@ const run = async () => {
         continue;
       }
       const [key, value] = line.split(" | ");
-      entry[key] = value;
+      if (key === "amountA" || key === "amountB") {
+        entry[key] = parseInt(value);
+      } else {
+        entry[key] = value;
+      }
     }
     return entry;
   });
-
-  console.log(data);
-
-  // fs.writeFile("test.txt", result, "utf8", (err) => {
-  //   if (err) {
-  //     console.log(`Error writing file: ${err}`);
-  //   } else {
-  //     console.log(`File ${"text.txt"} written successfully.`);
-  //   }
-  // });
-  // console.log(result);
+  const filename = "single-signed.json";
+  fs.writeFile(filename, result, "utf8", (err) => {
+    if (err) {
+      console.log(`Error writing file: ${err}`);
+    } else {
+      console.log(`File ${filename} written successfully.`);
+    }
+  });
   return;
 
   for (let chainName of Object.keys(HANDLED_CHAINS)) {
