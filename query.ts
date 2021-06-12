@@ -2,7 +2,7 @@ import { exec, execSync } from "child_process";
 
 export const QUERY = {
   GET: {
-    SINGLE_SIGNED: `select transfer."amountA", transfer."amountB", update."assetId", channel."chainId" from update join transfer on transfer."transferId" = update."transferId" join channel on update."channelAddressId" = channel."channelAddress" where update."transferDefinition" = '0xed911640fd86f92fD1337526010adda8F3Eb8344' and "transferResolver" is null and "fromIdentifier" = 'vector52rjrwRFUkaJai2J4TrngZ6doTUXGZhizHmrZ6J15xVv4YFgFC'`,
+    SINGLE_SIGNED: `select transfer."amountA", transfer."amountB", update."assetId", channel."chainId" from update join transfer on transfer."transferId" = update."transferId" join channel on update."channelAddressId" = channel."channelAddress" where update."transferDefinition" = '0xed911640fd86f92fD1337526010adda8F3Eb8344' and "transferResolver" is null and "fromIdentifier" = 'vector52rjrwRFUkaJai2J4TrngZ6doTUXGZhizHmrZ6J15xVv4YFgFC';`,
   },
 };
 
@@ -15,7 +15,11 @@ export const sendQuery = async (query: string): Promise<string> => {
           stdio: ["ignore", "ignore", "pipe"],
         }
       );
-      resolve(result.toString());
+      if (result) {
+        resolve(result.toString());
+      } else {
+        throw new Error(`Result was not valid: ${result}`);
+      }
     } catch (e) {
       console.error(e);
       reject(e);
