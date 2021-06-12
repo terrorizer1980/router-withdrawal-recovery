@@ -10,7 +10,11 @@ const execCommand = (
   child: ChildProcessWithoutNullStreams,
   command: string
 ) => {
-  child.stdin.write(command + "\r\n");
+  const writeCommand = command + "\r\n";
+  console.log("Writing", writeCommand);
+  child.stdin.write(writeCommand, (error) => {
+    console.error("Error in writing:", error);
+  });
   child.stdin.end();
 };
 
@@ -22,7 +26,7 @@ let child = spawn(COMMAND.BASE, {
 child.stderr.on("data", function(data) {
   console.error("STDERR:", data.toString());
 });
-child.stdout.on("data", function(data) {
+child.stdout.once("data", function(data) {
   const stdout = data.toString();
   console.log(count, stdout);
   switch (count) {
