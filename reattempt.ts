@@ -173,7 +173,7 @@ const run = async () => {
   let data = records.map((r) => {
     let entry = {};
     const lines = r.split("\n");
-    for (let line in lines) {
+    for (let line of lines) {
       if (line.length === 0) {
         continue;
       }
