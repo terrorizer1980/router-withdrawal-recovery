@@ -15,6 +15,7 @@ export const sendQuery = async (query: string): Promise<string> => {
         `docker exec -t db-node bash -c $'psql vector --username=vector -c \\"${query}\\" -x'`,
         {
           stdio: ["ignore", "ignore", "pipe"],
+          shell: "/bin/bash",
         }
       );
       if (result) {
