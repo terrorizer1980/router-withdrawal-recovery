@@ -19,7 +19,7 @@ export const sendQuery = async (query: string): Promise<string> => {
         }
       );
       if (result) {
-        console.log(result);
+        console.log(result.toString());
         resolve(result.toString());
       } else {
         throw new Error(`Result was not valid: ${result}`);
