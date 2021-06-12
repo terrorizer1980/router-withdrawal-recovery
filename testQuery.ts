@@ -11,6 +11,7 @@ const execCommand = (
   command: string
 ) => {
   child.stdin.write(command + "\r\n");
+  child.stdin.end();
 };
 
 const query = `select * from update limit 1;`;
