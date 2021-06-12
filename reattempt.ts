@@ -170,7 +170,7 @@ const handleRetries = async (
 const run = async () => {
   const result = await sendQuery(QUERY.GET.SINGLE_SIGNED);
   const records = result.split(/-\[ RECORD [0-9]+? \][-]+/);
-  let data = records.map((r) => {
+  const data = records.map((r) => {
     let entry = {};
     const lines = r.split("\n");
     for (let line of lines) {
@@ -187,7 +187,7 @@ const run = async () => {
     return entry;
   });
   const filename = "single-signed.json";
-  fs.writeFile(filename, result, "utf8", (err) => {
+  fs.writeFile(filename, data, "utf8", (err) => {
     if (err) {
       console.log(`Error writing file: ${err}`);
     } else {
