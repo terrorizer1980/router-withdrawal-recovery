@@ -12,6 +12,7 @@ import {
   RETRY_PARITY,
 } from "./constants";
 import { FlaggedTransfer, ChainTransferData } from "./types";
+import { sendQuery, QUERY } from "./query";
 
 dotEnvConfig();
 console.log("config: ", process.env);
@@ -168,6 +169,10 @@ const handleRetries = async (
 
 // "/:publicIdentifier/withdraw/transfer/:transferId"
 const run = async () => {
+  const result = await sendQuery(QUERY.GET.SINGLE_SIGNED);
+  console.log(result.split("\n")[0]);
+  return;
+
   for (const chainName of Object.keys(HANDLED_CHAINS)) {
     const envVar = `${chainName.toUpperCase}_PROVIDER_URL`;
     const provider = new providers.JsonRpcProvider(process.env[envVar]);
