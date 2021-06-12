@@ -23,6 +23,8 @@ let count = 0;
 let child = spawn(COMMAND.BASE, {
   shell: true,
 });
+child.stdin.on("data", (data) => console.log("STDIN:", data.toString()));
+child.stdin.on("close", () => console.log("STDIN CLOSED"));
 child.stderr.on("data", function(data) {
   console.error("STDERR:", data.toString());
 });
