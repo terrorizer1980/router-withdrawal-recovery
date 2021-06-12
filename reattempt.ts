@@ -169,7 +169,7 @@ const handleRetries = async (
 // "/:publicIdentifier/withdraw/transfer/:transferId"
 const run = async () => {
   const result = await sendQuery(QUERY.GET.SINGLE_SIGNED);
-  const records = result.split(/-\[ RECORD [0-9]+? \][-]+?/);
+  const records = result.split(/-\[ RECORD [0-9]+? \][-]+/);
   console.log(records.slice(0, 10).join("\n"));
 
   // fs.writeFile("test.txt", result, "utf8", (err) => {
