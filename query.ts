@@ -2,7 +2,7 @@ import { exec, execSync } from "child_process";
 
 export const QUERY = {
   GET: {
-    SINGLE_SIGNED: `select transfer."amountA", transfer."amountB", update."assetId", channel."chainId" from update join transfer on transfer."transferId" = update."transferId" join channel on update."channelAddressId" = channel."channelAddress" where update."transferDefinition" = '0xed911640fd86f92fD1337526010adda8F3Eb8344' and "transferResolver" is null and "fromIdentifier" = 'vector52rjrwRFUkaJai2J4TrngZ6doTUXGZhizHmrZ6J15xVv4YFgFC' limit 100;`,
+    SINGLE_SIGNED: `select transfer."amountA", transfer."amountB", update."assetId", channel."chainId" from update join transfer on transfer."transferId" = update."transferId" join channel on update."channelAddressId" = channel."channelAddress" where update."transferDefinition" = '0xed911640fd86f92fD1337526010adda8F3Eb8344' and "transferResolver" is null and "fromIdentifier" = 'vector52rjrwRFUkaJai2J4TrngZ6doTUXGZhizHmrZ6J15xVv4YFgFC' limit 10;`,
   },
 };
 
@@ -11,14 +11,12 @@ export const sendQuery = async (query: string): Promise<string> => {
     try {
       query = query.replace(/"/g, `\\\\"`);
       query = query.replace(/'/g, `\\\'`);
-      console.log("Sending query:\n", query, "\n");
-      const result = execSync(
-        `docker exec -t db-node bash -c $'psql vector --username=vector -c \\"${query}\\" -x'`,
-        {
-          // stdio: ["pipe", "pipe", "pipe"],
-          shell: "/bin/bash",
-        }
-      );
+      const command = `docker exec -t db-node bash -c $'psql vector --username=vector -c \\"${query}\\" -x'`;
+      console.log("Sending command:\n", command, "\n");
+      const result = execSync(command, {
+        // stdio: ["pipe", "pipe", "pipe"],
+        shell: "/bin/bash",
+      });
       if (result) {
         resolve(result.toString());
       } else {
