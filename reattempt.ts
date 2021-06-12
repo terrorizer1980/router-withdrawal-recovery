@@ -169,13 +169,14 @@ const handleRetries = async (
 // "/:publicIdentifier/withdraw/transfer/:transferId"
 const run = async () => {
   const result = await sendQuery(QUERY.GET.SINGLE_SIGNED);
-  fs.writeFile("test.txt", result, "utf8", (err) => {
-    if (err) {
-      console.log(`Error writing file: ${err}`);
-    } else {
-      console.log(`File ${"text.txt"} written successfully.`);
-    }
-  });
+  // fs.writeFile("test.txt", result, "utf8", (err) => {
+  //   if (err) {
+  //     console.log(`Error writing file: ${err}`);
+  //   } else {
+  //     console.log(`File ${"text.txt"} written successfully.`);
+  //   }
+  // });
+  console.log(result);
   return;
 
   for (const chainName of Object.keys(HANDLED_CHAINS)) {
