@@ -27,14 +27,19 @@ child.stderr.on("data", function(data) {
 });
 child.stdout.on("data", function(data) {
   const stdout = data.toString();
-  console.log("STDOUT:", stdout);
+  console.log(count, stdout);
   switch (count) {
     case 0:
-      child.stdin.write(COMMAND.EXPANDED_DISPLAY);
+      break;
     case 1:
+      child.stdin.write(COMMAND.EXPANDED_DISPLAY);
+      break;
+    case 2:
       child.stdin.write(query);
+      break;
     default:
       child.kill();
+      break;
   }
   count += 1;
 });
