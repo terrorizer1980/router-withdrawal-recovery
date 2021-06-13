@@ -14,6 +14,6 @@ export type FlaggedTransfer = {
 };
 
 export type Option = {
-  status: "unsubmitted" | "unmined";
-  target: "user" | "router";
+  status: string;
+  target: string;
 };

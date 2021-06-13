@@ -135,8 +135,8 @@ const handleRetries = async (
   provider: providers.JsonRpcProvider,
   chainName: string,
   chainId: number,
-  status: "unsubmitted" | "unmined",
-  target: "user" | "router"
+  status: string,
+  target: string
 ) => {
   // Retrieve all the stuck transfers related to this
   const transfers = await retrieveStuckTransfers(chainId, status, target);
