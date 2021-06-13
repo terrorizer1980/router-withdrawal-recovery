@@ -41,7 +41,7 @@ export const parseStuckTransfersQuery = (response: string): TransferData[] => {
   let records: TransferData[] = [];
   let match: any;
   do {
-    match = r.exec(res);
+    match = r.exec(response);
     // console.log(match);
     if (match) {
       const transferId = match[1];
