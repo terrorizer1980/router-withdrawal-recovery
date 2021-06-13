@@ -23,9 +23,11 @@ export const parseGenericQuery = (response: string): object[] => {
 };
 
 export const parseStuckTransfersQuery = (response: string): TransferData[] => {
+  console.log(response);
   const records = response.split(/-\[ RECORD [0-9]+? \][-]+/);
   return records.map((line) => {
     line = line.trim();
+
     const items = line.split(" | ");
     // Check to see which is the transferId using regex matching.
     // This is to ensure if it's ever mixed up in the way postgres returns it,
