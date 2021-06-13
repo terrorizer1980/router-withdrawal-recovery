@@ -23,8 +23,14 @@ export const parseGenericQuery = (response: string): object[] => {
 };
 
 export const parseStuckTransfersQuery = (response: string): TransferData[] => {
-  // console.log(response);
-  const records = response.split(/-\[ RECORD [0-9]+? \][-+]+/);
+  console.log(response);
+  // const records = response.split(/-\[ RECORD [0-9]+? \][-+]+/);
+  const records = response
+    .replace(/\\n/g, "")
+    .match(
+      /-\[ RECORD [0-9]+? \][-+]+?(0x[a-fA-F0-9]{40}.*?0x[a-fA-F0-9]{64})/
+    );
+  console.log(records);
   console.log(records);
   return records.map((line) => {
     line = line.trim();
@@ -32,7 +38,7 @@ export const parseStuckTransfersQuery = (response: string): TransferData[] => {
     const items = line.split(" | ");
     // Check to see which is the transferId using regex matching.
     // This is to ensure if it's ever mixed up in the way postgres returns it,
-    // we'll always handle it correctly.
+    // we'll always handle it correctly./^/
     const transferId = items.splice(
       items.findIndex((item) => !!item.match(/^0x([a-fA-F0-9]{64})$/)),
       1
