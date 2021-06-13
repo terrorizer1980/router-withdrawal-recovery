@@ -24,7 +24,7 @@ export const parseGenericQuery = (response: string): object[] => {
 
 export const parseStuckTransfersQuery = (response: string): TransferData[] => {
   // console.log(response.trim());
-  console.log(response.replace(/\n/g, ""));
+  // console.log(response.replace(/\n/g, ""));
   // const records = response.split(/-\[ RECORD [0-9]+? \][-+]+/);
   /*   One record looks like this:
    *   -[ RECORD 67 ]-+-------------------------------------------------------------------
@@ -33,29 +33,27 @@ export const parseStuckTransfersQuery = (response: string): TransferData[] => {
    *
    * -[ RECORD 50 ]-+-------------------------------------------------------------------transferId     | 0xb158a9aeae2f87a593fd960f986a55b33674ec907f5df43f83b06e7acfd9df01channelAddress | 0x133C9B3f9FBe9a99da8eE0F7853A9CfAdaDb57dc-
    */
-  const records = response
-    .replace(/\n/g, "")
-    .match(
-      /-+?\[ RECORD \d+? \]-\+-+?transferId\s+?\| (0x[a-fA-F0-9]{64})channelAddress\s+?\| (0x[a-fA-F0-9]{40})/
-    );
-  console.log(records);
-  return records.map((line) => {
-    line = line.trim();
-
-    const items = line.split(" | ");
-    // Check to see which is the transferId using regex matching.
-    // This is to ensure if it's ever mixed up in the way postgres returns it,
-    // we'll always handle it correctly./^/
-    const transferId = items.splice(
-      items.findIndex((item) => !!item.match(/^0x([a-fA-F0-9]{64})$/)),
-      1
-    )[0];
-    const channelAddress = items[0];
-    return {
-      transferId,
-      channelAddress,
-    } as TransferData;
-  });
+  // Check to see which is the transferId/channelAddress using regex matching.
+  // This is to ensure if it's ever mixed up in the way postgres returns it,
+  // we'll always handle it correctly./^/
+  const r = /-+?\[ RECORD \d+? \]-\+-+?transferId\s+?\| (0x[a-fA-F0-9]{64})channelAddress\s+?\| (0x[a-fA-F0-9]{40})/g;
+  response = response.replace(/\n/g, "");
+  let records: TransferData[] = [];
+  let match: any;
+  do {
+    match = r.exec(res);
+    // console.log(match);
+    if (match) {
+      const transferId = match[1];
+      const channelId = match[2];
+      records.push({
+        transferId,
+        channelId,
+      } as TransferData);
+    }
+  } while (match);
+  console.log(`Found ${records.length} records.`);
+  return records;
 };
 
 export const saveJsonFile = (filename: string, data: any) => {
