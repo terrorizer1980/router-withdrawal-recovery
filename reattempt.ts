@@ -146,11 +146,10 @@ const handleRetries = async (
   const executionName = [chainName, status, target].join(".");
   const mark = Date.now();
   console.log(`START: ${executionName}`);
-  let count = 0;
+  let count = 1;
   for (let transfer of transfers) {
     console.log(`${count} / ${transfers.length}`);
     count += 1;
-    console.log(transfer);
     await retryWithdrawal(
       transfer.channelAddress,
       transfer.transferId,
