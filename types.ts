@@ -2,7 +2,7 @@ import { providers } from "ethers";
 
 export type TransferData = {
   transferId: string;
-  channelAddress?: string;
+  channelAddress: string;
 };
 
 export type FlaggedTransfer = {

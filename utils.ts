@@ -41,10 +41,10 @@ export const parseStuckTransfersQuery = (response: string): TransferData[] => {
     match = r.exec(response);
     if (match) {
       const transferId = match[1];
-      const channelId = match[2];
+      const channelAddress = match[2];
       records.push({
         transferId,
-        channelId,
+        channelAddress,
       } as TransferData);
     }
   } while (match);
