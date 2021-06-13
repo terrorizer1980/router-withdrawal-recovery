@@ -150,11 +150,15 @@ const handleRetries = async (
   for (let transfer of transfers) {
     console.log(`${count} / ${transfers.length}`);
     count += 1;
-    await retryWithdrawal(
-      transfer.channelAddress,
-      transfer.transferId,
-      provider
-    );
+    try {
+      await retryWithdrawal(
+        transfer.channelAddress,
+        transfer.transferId,
+        provider
+      );
+    } catch (e) {
+      console.error("retryWithdrawal Error:", e);
+    }
     await new Promise<void>((res) => setTimeout(() => res(), RETRY_PARITY));
   }
   saveFlaggedTransfers(executionName);
