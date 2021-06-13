@@ -31,9 +31,7 @@ export const parseStuckTransfersQuery = (response: string): TransferData[] => {
     // This is to ensure if it's ever mixed up in the way postgres returns it,
     // we'll always handle it correctly.
     const transferId = items.splice(
-      items.findIndex(
-        (item) => item.match(/^0x([a-fA-F0-9]{64})$/).length === 1
-      ),
+      items.findIndex((item) => !!item.match(/^0x([a-fA-F0-9]{64})$/)),
       1
     )[0];
     const channelAddress = items[0];
