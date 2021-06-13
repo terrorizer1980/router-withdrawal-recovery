@@ -151,11 +151,11 @@ const handleRetries = async (
     console.log(`${count} / ${transfers.length}`);
     count += 1;
     console.log(transfer);
-    await retryWithdrawal(
-      transfer.channelAddress,
-      transfer.transferId,
-      provider
-    );
+    // await retryWithdrawal(
+    //   transfer.channelAddress,
+    //   transfer.transferId,
+    //   provider
+    // );
     await new Promise<void>((res) => setTimeout(() => res(), RETRY_PARITY));
   }
   saveFlaggedTransfers(executionName);
