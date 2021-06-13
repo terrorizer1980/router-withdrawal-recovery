@@ -141,7 +141,8 @@ const handleRetries = async (
   // Retrieve all the stuck transfers related to this
   const transfers = await retrieveStuckTransfers(chainId, status, target);
   const executionName = [chainName, status, target].join(".");
-  console.log(`Trying ${status}`);
+  const mark = Date.now();
+  console.log(`START: ${executionName}`);
   let count = 0;
   for (let transfer of transfers) {
     console.log(`${count} / ${transfers.length}`);
@@ -154,7 +155,9 @@ const handleRetries = async (
     await new Promise<void>((res) => setTimeout(() => res(), RETRY_PARITY));
   }
   saveFlaggedTransfers(executionName);
-  console.log(`Finished ${status}`);
+  console.log(
+    `FINISHED: ${executionName}. Execution time ${Date.now() - mark}ms.`
+  );
 };
 
 // "/:publicIdentifier/withdraw/transfer/:transferId"
