@@ -50,7 +50,6 @@ const retrieveStuckTransfers = async (
   console.log(
     `Retrieving stuck transfers for ${target}, ${status}, on chain ${chainId}`
   );
-  console.log(QUERY, QUERY[target], QUERY[target][status]);
   const query = QUERY[target][status](chainId);
   const response = await sendQuery(query);
   return parseStuckTransfersQuery(response);
@@ -175,8 +174,8 @@ const run = async () => {
         provider,
         chainName,
         chainId,
-        option.status,
-        option.target
+        option.target,
+        option.status
       );
     }
   }
