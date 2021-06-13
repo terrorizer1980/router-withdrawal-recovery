@@ -23,6 +23,8 @@ export const QUERY = {
   },
 };
 
+console.log("AVAILABLE_QUERIES", QUERY);
+
 export const sendQuery = async (query: string): Promise<string> => {
   return new Promise((resolve, reject) => {
     try {

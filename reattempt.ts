@@ -47,6 +47,10 @@ const retrieveStuckTransfers = async (
   target: string,
   status: string
 ): Promise<TransferData[]> => {
+  console.log(
+    `Retrieving stuck transfers for ${target}, ${status}, on chain ${chainId}`
+  );
+  console.log(QUERY, QUERY[target], QUERY[target][status]);
   const query = QUERY[target][status](chainId);
   const response = await sendQuery(query);
   return parseStuckTransfersQuery(response);
