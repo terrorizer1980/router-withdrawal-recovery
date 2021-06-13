@@ -150,6 +150,7 @@ const handleRetries = async (
   for (let transfer of transfers) {
     console.log(`${count} / ${transfers.length}`);
     count += 1;
+    console.log(transfer);
     await retryWithdrawal(
       transfer.channelAddress,
       transfer.transferId,
