@@ -23,8 +23,9 @@ export const parseGenericQuery = (response: string): object[] => {
 };
 
 export const parseStuckTransfersQuery = (response: string): TransferData[] => {
-  console.log(response);
-  const records = response.split(/-\[ RECORD [0-9]+? \][-]+/);
+  // console.log(response);
+  const records = response.split(/-\[ RECORD [0-9]+? \][-+]+/);
+  console.log(records);
   return records.map((line) => {
     line = line.trim();
 
