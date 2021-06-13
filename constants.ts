@@ -1,16 +1,5 @@
-import bsc from "./input/bsc";
-import matic from "./input/matic";
-import xdai from "./input/xdai";
-import ftm from "./input/ftm";
 import { Option } from "./types";
 
-// Chains we handle, for convenient iteration.
-export const HANDLED_CHAINS = {
-  bsc,
-  matic,
-  xdai,
-  ftm,
-};
 // Directory where we store output files, like flagged transfers, etc.
 export const OUTPUT_DIR = "output";
 export const ROUTER_IDENTIFIER =
@@ -21,24 +10,43 @@ export const UNMINED = "unmined";
 export const USER = "user";
 export const ROUTER = "router";
 
+// Chains we handle, for convenient iteration.
+export const HANDLED_CHAINS = {
+  bsc: 56,
+  matic: 137,
+  xdai: 100,
+  ftm: 250,
+};
+
 // 'Options' we handle, like each type of case - for convenient iteration.
 export const HANDLED_OPTIONS: Option[] = [
   {
-    forCase: UNSUBMITTED,
-    forTarget: ROUTER,
+    status: UNMINED,
+    target: ROUTER,
   },
-  {
-    forCase: UNSUBMITTED,
-    forTarget: USER,
-  },
-  {
-    forCase: UNMINED,
-    forTarget: ROUTER,
-  },
-  {
-    forCase: UNMINED,
-    forTarget: USER,
-  },
+  // TODO: Add these other cases to the list of handled cases.
+  // {
+  //   status: UNMINED,
+  //   target: USER,
+  // },
+  // {
+  //   status: UNSUBMITTED,
+  //   target: ROUTER,
+  // },
+  // {
+  //   status: UNSUBMITTED,
+  //   target: USER,
+  // },
 ];
 // Timeout in ms between withdrawal retry attempts.
 export const RETRY_PARITY = 1000;
+
+export const STATUS = {
+  UNSUBMITTED: "unsubmitted",
+  UNMINED: "unmined",
+};
+
+export const TARGET = {
+  USER: "user",
+  ROUTER: "router",
+};

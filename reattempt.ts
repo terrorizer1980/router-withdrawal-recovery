@@ -1,20 +1,19 @@
 import axios from "axios";
 import { constants, providers } from "ethers";
 import { config as dotEnvConfig } from "dotenv";
-import * as fs from "fs";
 import {
   HANDLED_CHAINS,
-  OUTPUT_DIR,
   ROUTER_IDENTIFIER,
   BASE_URL,
   HANDLED_OPTIONS,
   RETRY_PARITY,
 } from "./constants";
-import { FlaggedTransfer, ChainTransferData } from "./types";
+import { FlaggedTransfer, TransferData } from "./types";
 import { sendQuery, QUERY } from "./query";
+import { saveJsonFile, makeOutputDir, parseStuckTransfersQuery } from "./utils";
 
 dotEnvConfig();
-console.log("config: ", process.env);
+// console.log("config: ", process.env);
 
 // All transfers that have been flagged for review due to errors.
 // Includes transfers that will need to be disputed, etc. Saved to file at end of each
@@ -41,6 +40,16 @@ const logAxiosError = (error: any) => {
     console.log("Error", error.message);
   }
   console.log(error.config);
+};
+
+const retrieveStuckTransfers = async (
+  chainId: number,
+  target: string,
+  status: string
+): Promise<TransferData[]> => {
+  const query = QUERY[target][status](chainId);
+  const response = await sendQuery(query);
+  return parseStuckTransfersQuery(response);
 };
 
 const retryWithdrawal = async (
@@ -109,99 +118,59 @@ const retryWithdrawal = async (
   }
 };
 
-/// Helper to mkdir for output files if needed.
-const makeOutputDir = () => {
-  const dir = `./${OUTPUT_DIR}`;
-  try {
-    // Check if directory already exists.
-    if (!fs.existsSync(dir)) {
-      fs.mkdirSync(dir);
-      console.log(`Directory ${dir} is created.`);
-    }
-  } catch (err) {
-    console.log(err);
-  }
-};
-
 /// Helper for dumping flagged transfer info into a json file.
 const saveFlaggedTransfers = async (forCase: string) => {
   if (flaggedTransfers.length === 0) {
     console.log("No transfers were flagged, nothing to save.");
     return;
   }
-  // convert JSON object to a string
-  const data = JSON.stringify(flaggedTransfers);
   makeOutputDir();
-  // Write file to local disk in output directory.
-  const filename = `./${OUTPUT_DIR}/${forCase}.json`;
-  fs.writeFile(filename, data, "utf8", (err) => {
-    if (err) {
-      console.log(`Error writing file: ${err}`);
-    } else {
-      console.log(`File ${filename} written successfully.`);
-    }
-  });
+  // Convert JSON object to a string and write file to local disk in output directory.
+  saveJsonFile(forCase, JSON.stringify(flaggedTransfers));
   // Clear flagged transfers.
   flaggedTransfers = [];
 };
 
 const handleRetries = async (
   provider: providers.JsonRpcProvider,
-  chain: ChainTransferData,
-  forCase: "unsubmitted" | "unmined",
-  forTarget: "user" | "router"
+  chainName: string,
+  chainId: number,
+  status: "unsubmitted" | "unmined",
+  target: "user" | "router"
 ) => {
-  const chainName = Object.keys({ chain })[0];
-  const executionName = [chainName, forCase, forTarget].join(".");
-  console.log(`Trying ${forCase}`);
-  const iterable = chain[forCase][forTarget];
+  // Retrieve all the stuck transfers related to this
+  const transfers = await retrieveStuckTransfers(chainId, status, target);
+  const executionName = [chainName, status, target].join(".");
+  console.log(`Trying ${status}`);
   let count = 0;
-  for (const [transferId, channelAddress] of iterable) {
-    console.log(`${count} / ${iterable.length}`);
+  for (let transfer of transfers) {
+    console.log(`${count} / ${transfers.length}`);
     count += 1;
-    await retryWithdrawal(channelAddress, transferId, provider);
+    await retryWithdrawal(
+      transfer.channelAddress,
+      transfer.transferId,
+      provider
+    );
     await new Promise<void>((res) => setTimeout(() => res(), RETRY_PARITY));
   }
   saveFlaggedTransfers(executionName);
-  console.log(`Finished ${forCase}`);
+  console.log(`Finished ${status}`);
 };
 
 // "/:publicIdentifier/withdraw/transfer/:transferId"
 const run = async () => {
-  const result = await sendQuery(QUERY.GET.SINGLE_SIGNED);
-  const records = result.split(/-\[ RECORD [0-9]+? \][-]+/);
-  const data = records.map((r) => {
-    let entry = {};
-    const lines = r.split("\n");
-    for (let line of lines) {
-      if (line.length === 0) {
-        continue;
-      }
-      const [key, value] = line.split(" | ");
-      if (key === "amountA" || key === "amountB") {
-        entry[key] = parseInt(value);
-      } else {
-        entry[key] = value;
-      }
-    }
-    return entry;
-  });
-  const filename = "single-signed.json";
-  fs.writeFile(filename, JSON.stringify(data), "utf8", (err) => {
-    if (err) {
-      console.log(`Error writing file: ${err}`);
-    } else {
-      console.log(`File ${filename} written successfully.`);
-    }
-  });
-  return;
-
   for (let chainName of Object.keys(HANDLED_CHAINS)) {
     const envVar = `${chainName.toUpperCase}_PROVIDER_URL`;
     const provider = new providers.JsonRpcProvider(process.env[envVar]);
-    const chain = HANDLED_CHAINS[chainName];
+    const chainId = HANDLED_CHAINS[chainName];
     for (let option of HANDLED_OPTIONS) {
-      await handleRetries(provider, chain, option.forCase, option.forTarget);
+      await handleRetries(
+        provider,
+        chainName,
+        chainId,
+        option.status,
+        option.target
+      );
     }
   }
 };

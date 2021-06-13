@@ -1,5 +1,10 @@
 import { providers } from "ethers";
 
+export type TransferData = {
+  transferId: string;
+  channelAddress?: string;
+};
+
 export type FlaggedTransfer = {
   transactionHash: string;
   channelAddress: string;
@@ -8,18 +13,7 @@ export type FlaggedTransfer = {
   error: string;
 };
 
-export type ChainTransferData = {
-  unsubmitted: {
-    router: string[][];
-    user: any[];
-  };
-  unmined: {
-    user: any[];
-    router: any[];
-  };
-};
-
 export type Option = {
-  forCase: "unsubmitted" | "unmined";
-  forTarget: "user" | "router";
+  status: "unsubmitted" | "unmined";
+  target: "user" | "router";
 };
