@@ -23,9 +23,6 @@ export const parseGenericQuery = (response: string): object[] => {
 };
 
 export const parseStuckTransfersQuery = (response: string): TransferData[] => {
-  // console.log(response.trim());
-  // console.log(response.replace(/\n/g, ""));
-  // const records = response.split(/-\[ RECORD [0-9]+? \][-+]+/);
   /*   One record looks like this:
    *   -[ RECORD 67 ]-+-------------------------------------------------------------------
    *   transferId     | 0x0000000000000000000000000000000000000000000000000000000000000000
@@ -42,7 +39,6 @@ export const parseStuckTransfersQuery = (response: string): TransferData[] => {
   let match: any;
   do {
     match = r.exec(response);
-    // console.log(match);
     if (match) {
       const transferId = match[1];
       const channelId = match[2];
