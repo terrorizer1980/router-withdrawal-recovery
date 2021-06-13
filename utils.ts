@@ -36,7 +36,7 @@ export const parseStuckTransfersQuery = (response: string): TransferData[] => {
   const records = response
     .replace(/\n/g, "")
     .match(
-      /-\[ RECORD \d+? \]-\+-[-]+?transferId\s+?\| (0x[a-fA-F0-9]{40})channelAddress\s+?\| (0x[a-fA-F0-9]{64})-/
+      /--\[ RECORD \d+? \]-\+-------------------------------------------------------------------transferId\s+?\| (0x[a-fA-F0-9]{40})channelAddress\s+?\| (0x[a-fA-F0-9]{64})/
     );
   console.log(records);
   return records.map((line) => {
