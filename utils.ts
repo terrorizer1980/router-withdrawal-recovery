@@ -23,7 +23,8 @@ export const parseGenericQuery = (response: string): object[] => {
 };
 
 export const parseStuckTransfersQuery = (response: string): TransferData[] => {
-  console.log(response.replace(/\\n/g, ""));
+  console.log(response.trim());
+  console.log(response.trim().replace(/\n/g, ""));
   // const records = response.split(/-\[ RECORD [0-9]+? \][-+]+/);
   /*   One record looks like this:
    *   -[ RECORD 67 ]-+-------------------------------------------------------------------
@@ -31,7 +32,7 @@ export const parseStuckTransfersQuery = (response: string): TransferData[] => {
    *   channelAddress | 0x0000000000000000000000000000000000000000
    */
   const records = response
-    .replace(/\\n/g, "")
+    .replace(/\n/g, "")
     .match(
       /-\[ RECORD \d+? \][\-+]+?transferId\s+?\| (0x[a-fA-F0-9]{40})channelAddress\s+?\| (0x[a-fA-F0-9]{64})/
     );
