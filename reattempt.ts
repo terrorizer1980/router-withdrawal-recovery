@@ -19,6 +19,7 @@ dotEnvConfig();
 // Includes transfers that will need to be disputed, etc. Saved to file at end of each
 // iteration.
 let flaggedTransfers: FlaggedTransfer[] = [];
+let singleSignedTransfers: FlaggedTransfer[] = [];
 
 // TODO:
 // let rescuedFunds: { [chain: string]: number };
@@ -110,14 +111,25 @@ const retryWithdrawal = async (
     });
   } catch (error) {
     console.log(`Error on transfer: ${transferId}`);
+
     logAxiosError(error);
-    flaggedTransfers.push({
-      transactionHash: commitment.transactionHash,
-      channelAddress: commitment.channelAddress,
-      transferId,
-      receipt,
-      error,
-    });
+    if (error.message.includes("Withdrawal commitment single-signed")) {
+      singleSignedTransfers.push({
+        transactionHash: commitment.transactionHash,
+        channelAddress: commitment.channelAddress,
+        transferId,
+        receipt,
+        error,
+      });
+    } else {
+      flaggedTransfers.push({
+        transactionHash: commitment.transactionHash,
+        channelAddress: commitment.channelAddress,
+        transferId,
+        receipt,
+        error,
+      });
+    }
   }
 };
 
@@ -129,7 +141,8 @@ const saveFlaggedTransfers = async (forCase: string) => {
   }
   makeOutputDir();
   // Convert JSON object to a string and write file to local disk in output directory.
-  saveJsonFile(forCase, JSON.stringify(flaggedTransfers));
+  saveJsonFile(`errors-${forCase}`, JSON.stringify(flaggedTransfers));
+  saveJsonFile(`singlesigned-${forCase}`, JSON.stringify(flaggedTransfers));
   // Clear flagged transfers.
   flaggedTransfers = [];
 };
