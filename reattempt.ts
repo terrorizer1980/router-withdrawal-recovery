@@ -137,7 +137,7 @@ const retryWithdrawal = async (
 
 /// Helper for dumping flagged transfer info into a json file.
 const saveFlaggedTransfers = async (forCase: string) => {
-  if (flaggedTransfers.length === 0 || singleSignedTransfers.length === 0) {
+  if (flaggedTransfers.length === 0 && singleSignedTransfers.length === 0) {
     console.log("No transfers were flagged, nothing to save.");
     return;
   }
