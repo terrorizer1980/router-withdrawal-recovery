@@ -123,7 +123,7 @@ const retryWithdrawal = async (
         error,
       });
     } else {
-      console.log(`Flagging transfer for error ${error}`);
+      console.log(`Flagging transfer for error ${error.message}`);
       flaggedTransfers.push({
         transactionHash: commitment.transactionHash,
         channelAddress: commitment.channelAddress,
@@ -164,10 +164,10 @@ const handleRetries = async (
   const transfers = await retrieveStuckTransfers(chainId, status, target);
   const executionName = [chainName, status, target].join(".");
   const mark = Date.now();
-  console.log(`START: ${executionName}`);
+  console.log(`\nSTART: ${executionName}`);
   let count = 1;
   for (let transfer of transfers) {
-    console.log(`${count} / ${transfers.length}`);
+    console.log(`\n${count} / ${transfers.length}`);
     count += 1;
     try {
       await retryWithdrawal(
@@ -182,7 +182,7 @@ const handleRetries = async (
   }
   saveFlaggedTransfers(executionName);
   console.log(
-    `FINISHED: ${executionName}. Execution time ${Date.now() - mark}ms.`
+    `\nFINISHED: ${executionName}. Execution time ${Date.now() - mark}ms.`
   );
 };
 
