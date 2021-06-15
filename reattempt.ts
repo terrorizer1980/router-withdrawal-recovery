@@ -127,7 +127,7 @@ const retryWithdrawal = async (
         error,
       });
     } else {
-      console.log(`Flagging transfer for error ${error.message}`);
+      console.log(`Flagging transfer for error ${error.response.data.message}`);
       flaggedTransfers.push({
         transactionHash: commitment.transactionHash,
         channelAddress: commitment.channelAddress,
