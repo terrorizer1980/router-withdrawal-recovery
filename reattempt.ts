@@ -143,14 +143,22 @@ const saveFlaggedTransfers = async (forCase: string) => {
   }
   console.log("Saving flagged transfers...");
   makeOutputDir();
-  // Convert JSON object to a string and write file to local disk in output directory.
-  saveJsonFile(`errors-${forCase}`, JSON.stringify(flaggedTransfers));
-  saveJsonFile(
-    `singlesigned-${forCase}`,
-    JSON.stringify(singleSignedTransfers)
-  );
+  // Convert lists to a JSON string and write file to local disk in output directory.
+  if (flaggedTransfers.length > 0) {
+    console.log("flagged:", flaggedTransfers);
+    saveJsonFile(`errors-${forCase}`, JSON.stringify(flaggedTransfers));
+  }
+  if (singleSignedTransfers.length > 0) {
+    console.log("single signed:", singleSignedTransfers);
+    saveJsonFile(
+      `singlesigned-${forCase}`,
+      JSON.stringify(singleSignedTransfers)
+    );
+  }
+
   // Clear flagged transfers.
   flaggedTransfers = [];
+  singleSignedTransfers = [];
 };
 
 const handleRetries = async (
