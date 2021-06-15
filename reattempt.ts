@@ -112,7 +112,7 @@ const retryWithdrawal = async (
   } catch (error) {
     console.log(`Error on transfer: ${transferId}`);
 
-    // logAxiosError(error);
+    logAxiosError(error);
     if (error.message.includes("Withdrawal commitment single-signed")) {
       console.log("Flagging single-signed withdrawal.");
       singleSignedTransfers.push({
