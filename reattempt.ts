@@ -113,7 +113,11 @@ const retryWithdrawal = async (
     console.log(`Error on transfer: ${transferId}`);
 
     logAxiosError(error);
-    if (error.message.includes("Withdrawal commitment single-signed")) {
+    if (
+      error.response.data.message.includes(
+        "Withdrawal commitment single-signed"
+      )
+    ) {
       console.log("Flagging single-signed withdrawal.");
       singleSignedTransfers.push({
         transactionHash: commitment.transactionHash,
@@ -146,14 +150,11 @@ const saveFlaggedTransfers = async (forCase: string) => {
   // Convert lists to a JSON string and write file to local disk in output directory.
   if (flaggedTransfers.length > 0) {
     console.log("flagged:", flaggedTransfers);
-    saveJsonFile(`errors-${forCase}`, JSON.stringify(flaggedTransfers));
+    saveJsonFile(`errors-${forCase}`, flaggedTransfers);
   }
   if (singleSignedTransfers.length > 0) {
     console.log("single signed:", singleSignedTransfers);
-    saveJsonFile(
-      `singlesigned-${forCase}`,
-      JSON.stringify(singleSignedTransfers)
-    );
+    saveJsonFile(`singlesigned-${forCase}`, singleSignedTransfers);
   }
 
   // Clear flagged transfers.
