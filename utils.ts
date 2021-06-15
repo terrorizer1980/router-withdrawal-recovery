@@ -1,26 +1,30 @@
 import * as fs from "fs";
 import { OUTPUT_DIR } from "./constants";
 import { TransferData } from "./types";
+import { safeJsonParse } from "@connext/vector-utils";
 
-export const parseGenericQuery = (response: string): object[] => {
-  const records = response.split(/-\[ RECORD [0-9]+? \][-]+/);
+export function parseGenericQuery<T = object>(response: string): T[] {
+  const records = response
+    .split(/-. RECORD [0-9]+ .-{1,}.-{1,}\n/)
+    .map((s) => s.trim())
+    .filter((x) => !!x);
   return records.map((r) => {
-    let entry = {};
+    let entry: any = {};
     const lines = r.split("\n");
     for (let line of lines) {
       if (line.length === 0) {
         continue;
       }
       const [key, value] = line.split(" | ");
-      if (key === "amountA" || key === "amountB") {
-        entry[key] = parseInt(value);
-      } else {
-        entry[key] = value;
-      }
+      const trimmed = value.trim();
+      entry[key.trim()] =
+        trimmed.startsWith("{") && trimmed.endsWith("}")
+          ? safeJsonParse(value)
+          : trimmed;
     }
     return entry;
   });
-};
+}
 
 export const parseStuckTransfersQuery = (response: string): TransferData[] => {
   /*   One record looks like this:
