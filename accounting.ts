@@ -1,12 +1,12 @@
 import { sendQuery, QUERY } from "./query";
-import { parseGenericQuery, saveJsonFile } from "./utils";
+import { parseGenericQuery } from "./utils";
 import { ASSET_MAP } from "./constants";
 
 type SumData = {
   sum: string;
 };
 
-const run = async () => {
+export const run = async (): Promise<number> => {
   let sum = 0;
   for (const asset in ASSET_MAP) {
     const info = ASSET_MAP[asset];
@@ -14,7 +14,6 @@ const run = async () => {
     try {
       const data = parseGenericQuery<SumData>(response)[0];
       const amount = parseFloat(data.sum) / Math.pow(10, info.decimals);
-      console.log(data, data.sum, parseFloat(data.sum));
       console.log(info.token, ":", amount);
       if (amount) {
         sum += amount;
@@ -23,9 +22,8 @@ const run = async () => {
       console.log(`Could not parse for assetId: ${asset}`);
     }
   }
-  // saveJsonFile("single-signed.json", data);
-
   console.log("Total usd:", sum);
+  return sum;
 };
 
 run();
