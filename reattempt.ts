@@ -1,19 +1,28 @@
 import axios from "axios";
 import { constants, providers } from "ethers";
 import { config as dotEnvConfig } from "dotenv";
-
-import bsc from "./input/bsc";
-import matic from "./input/matic";
-import xdai from "./input/xdai";
-import ftm from "./input/ftm";
+import {
+  HANDLED_CHAINS,
+  ROUTER_IDENTIFIER,
+  BASE_URL,
+  HANDLED_OPTIONS,
+  RETRY_PARITY,
+} from "./constants";
+import { FlaggedTransfer, TransferData } from "./types";
+import { sendQuery, QUERY } from "./query";
+import { saveJsonFile, makeOutputDir, parseStuckTransfersQuery } from "./utils";
 
 dotEnvConfig();
+// console.log("config: ", process.env);
 
-console.log("config: ", process.env);
+// All transfers that have been flagged for review due to errors.
+// Includes transfers that will need to be disputed, etc. Saved to file at end of each
+// iteration.
+let flaggedTransfers: FlaggedTransfer[] = [];
+let singleSignedTransfers: FlaggedTransfer[] = [];
 
-const routerIdentitifer =
-  "vector52rjrwRFUkaJai2J4TrngZ6doTUXGZhizHmrZ6J15xVv4YFgFC";
-const baseUrl = "http://localhost:8002";
+// TODO:
+// let rescuedFunds: { [chain: string]: number };
 
 const logAxiosError = (error: any) => {
   if (error.response) {
@@ -34,6 +43,19 @@ const logAxiosError = (error: any) => {
   console.log(error.config);
 };
 
+const retrieveStuckTransfers = async (
+  chainId: number,
+  target: string,
+  status: string
+): Promise<TransferData[]> => {
+  console.log(
+    `Retrieving stuck transfers for ${target}, ${status}, on chain ${chainId}`
+  );
+  const query = QUERY[target][status](chainId);
+  const response = await sendQuery(query);
+  return parseStuckTransfersQuery(response);
+};
+
 const retryWithdrawal = async (
   channelAddress: string,
   transferId: string,
@@ -45,7 +67,7 @@ const retryWithdrawal = async (
   };
   try {
     const res = await axios.get(
-      `${baseUrl}/${routerIdentitifer}/withdraw/transfer/${transferId}`
+      `${BASE_URL}/${ROUTER_IDENTIFIER}/withdraw/transfer/${transferId}`
     );
     commitment = res.data;
   } catch (e) {
@@ -56,6 +78,8 @@ const retryWithdrawal = async (
   console.log(
     `Checking withdrawal: ${transferId} for channel ${commitment.channelAddress}`
   );
+
+  let receipt: providers.TransactionReceipt | undefined = undefined;
   if (commitment.transactionHash) {
     console.log(
       "Commitment has existing transaction hash",
@@ -64,21 +88,20 @@ const retryWithdrawal = async (
     if (commitment.transactionHash === constants.HashZero) {
       return;
     }
-    const receipt = await provider.getTransactionReceipt(
-      commitment.transactionHash
-    );
-    if (receipt) {
-      console.log("Tx receipt available", transferId);
-    }
+    // receipt = await provider.getTransactionReceipt(commitment.transactionHash);
+    // if (receipt) {
+    //   console.log("Tx receipt available", transferId);
+    // }
   } else {
     console.log("Commitment missing hash");
   }
+
   console.log(
     `Reattempting withdrawal: ${transferId} for channel ${commitment.channelAddress}`
   );
   try {
-    const res = await axios.post(`${baseUrl}/withdraw/retry`, {
-      publicIdentifier: routerIdentitifer,
+    const res = await axios.post(`${BASE_URL}/withdraw/retry`, {
+      publicIdentifier: ROUTER_IDENTIFIER,
       channelAddress,
       transferId,
     });
@@ -88,141 +111,111 @@ const retryWithdrawal = async (
     });
   } catch (error) {
     console.log(`Error on transfer: ${transferId}`);
+    if (
+      error.response.data.message.includes(
+        "Withdrawal commitment single-signed"
+      )
+    ) {
+      console.log("Flagging single-signed withdrawal.");
+      singleSignedTransfers.push({
+        transactionHash: commitment.transactionHash,
+        channelAddress: commitment.channelAddress,
+        transferId,
+        receipt,
+        error,
+      });
+    } else if (
+      error.response.data.message.includes("Withdrawal transaction found")
+    ) {
+      // TODO: Handle this case: we need to update DB / offchain state.
+      console.log("Withdrawal transaction found.");
+      return;
+    } else {
+      console.log(`Flagging transfer for error ${error.response.data.message}`);
+      flaggedTransfers.push({
+        transactionHash: commitment.transactionHash,
+        channelAddress: commitment.channelAddress,
+        transferId,
+        receipt,
+        error,
+      });
+    }
     logAxiosError(error);
   }
 };
 
+/// Helper for dumping flagged transfer info into a json file.
+const saveFlaggedTransfers = async (forCase: string) => {
+  if (flaggedTransfers.length === 0 && singleSignedTransfers.length === 0) {
+    console.log("No transfers were flagged, nothing to save.");
+    return;
+  }
+  console.log("Saving flagged transfers...");
+  makeOutputDir();
+  // Convert lists to a JSON string and write file to local disk in output directory.
+  if (flaggedTransfers.length > 0) {
+    console.log("flagged:", flaggedTransfers);
+    saveJsonFile(`errors-${forCase}`, flaggedTransfers);
+  }
+  if (singleSignedTransfers.length > 0) {
+    console.log("single signed:", singleSignedTransfers);
+    saveJsonFile(`singlesigned-${forCase}`, singleSignedTransfers);
+  }
+
+  // Clear flagged transfers.
+  flaggedTransfers = [];
+  singleSignedTransfers = [];
+};
+
+const handleRetries = async (
+  provider: providers.JsonRpcProvider,
+  chainName: string,
+  chainId: number,
+  status: string,
+  target: string
+) => {
+  // Retrieve all the stuck transfers related to this
+  const transfers = await retrieveStuckTransfers(chainId, status, target);
+  const executionName = [chainName, status, target].join(".");
+  const mark = Date.now();
+  console.log(`\nSTART: ${executionName}`);
+  let count = 1;
+  for (let transfer of transfers) {
+    console.log(`\n${count} / ${transfers.length}`);
+    count += 1;
+    try {
+      await retryWithdrawal(
+        transfer.channelAddress,
+        transfer.transferId,
+        provider
+      );
+    } catch (e) {
+      console.error("retryWithdrawal Error:", e);
+    }
+    await new Promise<void>((res) => setTimeout(() => res(), RETRY_PARITY));
+  }
+  saveFlaggedTransfers(executionName);
+  console.log(
+    `\nFINISHED: ${executionName}. Execution time ${Date.now() - mark}ms.`
+  );
+};
+
 // "/:publicIdentifier/withdraw/transfer/:transferId"
 const run = async () => {
-  ////////// ROUTER
-  // BSC
-  let provider = new providers.JsonRpcProvider(process.env.BSC_PROVIDER_URL);
-  console.log("Trying bsc.unsubmitted.router");
-  let count = 0;
-  for (const [transferId, channelAddress] of bsc.unsubmitted.router) {
-    console.log(`${count} / ${bsc.unsubmitted.router.length}`);
-    count += 1;
-    await retryWithdrawal(channelAddress, transferId, provider);
-    await new Promise<void>((res) => setTimeout(() => res(), 1000));
+  for (let chainName of Object.keys(HANDLED_CHAINS)) {
+    const envVar = `${chainName.toUpperCase}_PROVIDER_URL`;
+    const provider = new providers.JsonRpcProvider(process.env[envVar]);
+    const chainId = HANDLED_CHAINS[chainName];
+    for (let option of HANDLED_OPTIONS) {
+      await handleRetries(
+        provider,
+        chainName,
+        chainId,
+        option.target,
+        option.status
+      );
+    }
   }
-  console.log("Finished bsc.unsubmitted.router");
-
-  console.log("Trying bsc.unsubmitted.user");
-  count = 0;
-  for (const [transferId, channelAddress] of bsc.unsubmitted.user) {
-    console.log(`${count} / ${bsc.unsubmitted.user.length}`);
-    count += 1;
-    await retryWithdrawal(channelAddress, transferId, provider);
-    await new Promise<void>((res) => setTimeout(() => res(), 1000));
-  }
-  console.log("Finished bsc.unsubmitted.user");
-
-  console.log("Trying bsc.unmined.router");
-  count = 0;
-  for (const [transferId, channelAddress] of bsc.unmined.router) {
-    console.log(`${count} / ${bsc.unmined.router.length}`);
-    count += 1;
-    await retryWithdrawal(channelAddress, transferId, provider);
-    await new Promise<void>((res) => setTimeout(() => res(), 1000));
-  }
-  console.log("Finished bsc.unmined.router");
-
-  // MATIC
-  provider = new providers.JsonRpcProvider(process.env.MATIC_PROVIDER_URL);
-  console.log("Trying matic.unsubmitted.router");
-  count = 0;
-  for (const [transferId, channelAddress] of matic.unsubmitted.router) {
-    console.log(`${count} / ${matic.unsubmitted.router.length}`);
-    count += 1;
-    await retryWithdrawal(channelAddress, transferId, provider);
-    await new Promise<void>((res) => setTimeout(() => res(), 1000));
-  }
-  console.log("Finished matic.unsubmitted.router");
-
-  console.log("Trying matic.unsubmitted.user");
-  count = 0;
-  for (const [transferId, channelAddress] of matic.unsubmitted.user) {
-    console.log(`${count} / ${matic.unsubmitted.user.length}`);
-    count += 1;
-    await retryWithdrawal(channelAddress, transferId, provider);
-    await new Promise<void>((res) => setTimeout(() => res(), 1000));
-  }
-  console.log("Finished matic.unsubmitted.user");
-
-  console.log("Trying matic.unmined.router");
-  count = 0;
-  for (const [transferId, channelAddress] of matic.unmined.router) {
-    console.log(`${count} / ${matic.unmined.router.length}`);
-    count += 1;
-    await retryWithdrawal(channelAddress, transferId, provider);
-    await new Promise<void>((res) => setTimeout(() => res(), 1000));
-  }
-  console.log("Finished matic.unmined.router");
-
-  // XDAI
-  provider = new providers.JsonRpcProvider(process.env.XDAI_PROVIDER_URL);
-  console.log("Trying xdai.unsubmitted.router");
-  count = 0;
-  for (const [transferId, channelAddress] of xdai.unsubmitted.router) {
-    console.log(`${count} / ${xdai.unsubmitted.router.length}`);
-    count += 1;
-    await retryWithdrawal(channelAddress, transferId, provider);
-    await new Promise<void>((res) => setTimeout(() => res(), 1000));
-  }
-  console.log("Finished xdai.unsubmitted.router");
-
-  console.log("Trying xdai.unsubmitted.user");
-  count = 0;
-  for (const [transferId, channelAddress] of xdai.unsubmitted.user) {
-    console.log(`${count} / ${xdai.unsubmitted.user.length}`);
-    count += 1;
-    await retryWithdrawal(channelAddress, transferId, provider);
-    await new Promise<void>((res) => setTimeout(() => res(), 1000));
-  }
-  console.log("Finished xdai.unsubmitted.user");
-
-  console.log("Trying xdai.unmined.router");
-  count = 0;
-  for (const [transferId, channelAddress] of xdai.unmined.router) {
-    console.log(`${count} / ${xdai.unmined.router.length}`);
-    count += 1;
-    await retryWithdrawal(channelAddress, transferId, provider);
-    await new Promise<void>((res) => setTimeout(() => res(), 1000));
-  }
-  console.log("Finished xdai.unmined.router");
-
-  // FTM
-  provider = new providers.JsonRpcProvider(process.env.FTM_PROVIDER_URL);
-  console.log("Trying ftm.unsubmitted.router");
-  count = 0;
-  for (const [transferId, channelAddress] of ftm.unsubmitted.router) {
-    console.log(`${count} / ${ftm.unsubmitted.router.length}`);
-    count += 1;
-    await retryWithdrawal(channelAddress, transferId, provider);
-    await new Promise<void>((res) => setTimeout(() => res(), 1000));
-  }
-  console.log("Finished ftm.unsubmitted.router");
-
-  console.log("Trying ftm.unsubmitted.user");
-  count = 0;
-  for (const [transferId, channelAddress] of ftm.unsubmitted.user) {
-    console.log(`${count} / ${ftm.unsubmitted.user.length}`);
-    count += 1;
-    await retryWithdrawal(channelAddress, transferId, provider);
-    await new Promise<void>((res) => setTimeout(() => res(), 1000));
-  }
-  console.log("Finished ftm.unsubmitted.user");
-
-  console.log("Trying ftm.unmined.router");
-  count = 0;
-  for (const [transferId, channelAddress] of ftm.unmined.router) {
-    console.log(`${count} / ${ftm.unmined.router.length}`);
-    count += 1;
-    await retryWithdrawal(channelAddress, transferId, provider);
-    await new Promise<void>((res) => setTimeout(() => res(), 1000));
-  }
-  console.log("Finished ftm.unmined.router");
-  //////////
 };
 
 run();
