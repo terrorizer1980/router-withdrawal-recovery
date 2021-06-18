@@ -26,13 +26,18 @@ export const QUERY = {
   },
 };
 
-export const sendQuery = async (query: string): Promise<string> => {
+export const sendQuery = async (
+  query: string,
+  logging: boolean = false
+): Promise<string> => {
   return new Promise((resolve, reject) => {
     try {
       query = query.replace(/"/g, `\\\\"`);
       query = query.replace(/'/g, `\\\'`);
       const command = `docker exec db-node bash -c $'psql vector --username=vector -c \\"${query}\\" -x'`;
-      console.log("Sending command:\n", command, "\n");
+      if (logging) {
+        console.log("Sending command:\n", command, "\n");
+      }
 
       const result = execSync(command, {
         shell: "/bin/bash",
