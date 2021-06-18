@@ -111,8 +111,6 @@ const retryWithdrawal = async (
     });
   } catch (error) {
     console.log(`Error on transfer: ${transferId}`);
-
-    logAxiosError(error);
     if (
       error.response.data.message.includes(
         "Withdrawal commitment single-signed"
@@ -126,6 +124,12 @@ const retryWithdrawal = async (
         receipt,
         error,
       });
+    } else if (
+      error.response.data.message.includes("Withdrawal transaction found")
+    ) {
+      // TODO: Handle this case: we need to update DB / offchain state.
+      console.log("Withdrawal transaction found.");
+      return;
     } else {
       console.log(`Flagging transfer for error ${error.response.data.message}`);
       flaggedTransfers.push({
@@ -136,6 +140,7 @@ const retryWithdrawal = async (
         error,
       });
     }
+    logAxiosError(error);
   }
 };
 

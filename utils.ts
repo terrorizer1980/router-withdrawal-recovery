@@ -32,13 +32,16 @@ export const parseStuckTransfersQuery = (response: string): TransferData[] => {
    *   transferId     | 0x0000000000000000000000000000000000000000000000000000000000000000
    *   channelAddress | 0x0000000000000000000000000000000000000000
    *
-   * -[ RECORD 50 ]-+-------------------------------------------------------------------transferId     | 0xb158a9aeae2f87a593fd960f986a55b33674ec907f5df43f83b06e7acfd9df01channelAddress | 0x133C9B3f9FBe9a99da8eE0F7853A9CfAdaDb57dc-
+   * And with misc chars removed:
+   * [ RECORD 50 ]transferId     | 0xb158a9aeae2f87a593fd960f986a55b33674ec907f5df43f83b06e7acfd9df01channelAddress | 0x133C9B3f9FBe9a99da8eE0F7853A9CfAdaDb57dc
    */
   // Check to see which is the transferId/channelAddress using regex matching.
   // This is to ensure if it's ever mixed up in the way postgres returns it,
   // we'll always handle it correctly./^/
-  const r = /-+?\[ RECORD \d+? \]-\+-+?transferId\s+?\| (0x[a-fA-F0-9]{64})channelAddress\s+?\| (0x[a-fA-F0-9]{40})/g;
+  const r = /\[ RECORD \d+ \]transferId\s+?\| (0x[a-fA-F0-9]{64})channelAddress\s+?\| (0x[a-fA-F0-9]{40})/g;
   response = response.replace(/\n/g, "");
+  response = response.replace(/-/g, "");
+  response = response.replace(/\+/g, "");
   let records: TransferData[] = [];
   let match: any;
   do {
