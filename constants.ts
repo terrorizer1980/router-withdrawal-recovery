@@ -31,10 +31,10 @@ export const HANDLED_OPTIONS: Option[] = [
     target: TARGET.ROUTER,
   },
   // TODO: Add these other cases to the list of handled cases.
-  // {
-  //   status: STATUS.UNMINED,
-  //   target: TARGET.USER,
-  // },
+  {
+    status: STATUS.UNMINED,
+    target: TARGET.USER,
+  },
   // {
   //   status: STATUS.UNSUBMITTED,
   //   target: TARGET.ROUTER,
