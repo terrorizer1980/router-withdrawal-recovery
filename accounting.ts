@@ -7,11 +7,11 @@ const run = async () => {
     const info = ASSET_MAP[asset];
     const response = await sendQuery(QUERY.SUM_VALUE(-1, asset));
     console.log(response);
-    console.log(parseGenericQuery(response));
-    const match = response.match(/sum \| (\d+)/);
-    console.log(match);
-    return;
-    const data = match[1];
+    // console.log(parseGenericQuery(response));
+    // const match = response.match(/sum \| (\d+)/);
+    // console.log(match);
+    // return;
+    // const data = match[1];
   }
   // saveJsonFile("single-signed.json", data);
 };
