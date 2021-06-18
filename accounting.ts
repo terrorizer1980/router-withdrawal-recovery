@@ -8,9 +8,13 @@ const run = async () => {
     const info = ASSET_MAP[asset];
     const response = await sendQuery(QUERY.SUM_VALUE(-1, asset), false);
     try {
-      console.log(response);
       const data = parseGenericQuery(response);
-      sum += parseFloat(data["sum"]) / info.decimals;
+      const amount = parseFloat(data["sum"]) / Math.pow(10, info.decimals);
+      console.log(data, data["sum"], parseFloat(data["sum"]));
+      console.log(info.token, ":", amount);
+      if (amount) {
+        sum += amount;
+      }
     } catch (e) {
       console.log(`Could not parse for assetId: ${asset}`);
     }
