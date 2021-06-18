@@ -7,6 +7,14 @@ const run = async () => {
     const info = ASSET_MAP[asset];
     const response = await sendQuery(QUERY.SUM_VALUE(-1, asset));
     console.log(response);
+    try {
+      console.log(parseGenericQuery(response));
+      const match = response.match(/sum \| (\d+)/);
+      console.log(match);
+    } catch (e) {
+      console.log(`Could not parse for assetId: ${asset}`);
+    }
+
     // console.log(parseGenericQuery(response));
     // const match = response.match(/sum \| (\d+)/);
     // console.log(match);
