@@ -5,6 +5,9 @@ export const QUERY = {
   SINGLE_SIGNED: (chainId: number) => {
     return `select transfer."transferId", transfer."amountA", transfer."amountB", update."assetId", channel."chainId" from update join transfer on transfer."transferId" = update."transferId" join channel on update."channelAddressId" = channel."channelAddress" where update."transferDefinition" = '0xed911640fd86f92fD1337526010adda8F3Eb8344' and "transferResolver" is null and "fromIdentifier" = 'vector52rjrwRFUkaJai2J4TrngZ6doTUXGZhizHmrZ6J15xVv4YFgFC';`;
   },
+  SUM_VALUE: (chainId: number, assetId: string) => {
+    return `select sum(cast(transfer."amountA" as numeric)) from update join transfer on transfer."transferId" = update."transferId" join onchain_transaction on onchain_transaction."id" = transfer."onchainTransactionId" join channel on update."channelAddressId" = channel."channelAddress" where update."assetId" = '${assetId}' and update."transferDefinition" = '0xed911640fd86f92fD1337526010adda8F3Eb8344' and "transactionHash" is null and  "fromIdentifier" = 'vector52rjrwRFUkaJai2J4TrngZ6doTUXGZhizHmrZ6J15xVv4YFgFC';`;
+  },
   [TARGET.ROUTER]: {
     [STATUS.UNSUBMITTED]: (chainId: number) => {
       return `select transfer."transferId", channel."channelAddress" from update join transfer on transfer."transferId" = update."transferId" join channel on update."channelAddressId" = channel."channelAddress" join onchain_transaction on transfer."onchainTransactionId" = onchain_transaction."transactionHash" where update."transferDefinition" = '0xed911640fd86f92fD1337526010adda8F3Eb8344' and channel."chainId" = '${chainId}' and "fromIdentifier" = 'vector52rjrwRFUkaJai2J4TrngZ6doTUXGZhizHmrZ6J15xVv4YFgFC' and not onchain_transaction."status" = 'mined';`;
