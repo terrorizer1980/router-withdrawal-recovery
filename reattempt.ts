@@ -11,6 +11,7 @@ import {
 import { FlaggedTransfer, TransferData } from "./types";
 import { sendQuery, QUERY } from "./query";
 import { saveJsonFile, makeOutputDir, parseStuckTransfersQuery } from "./utils";
+import { WithdrawCommitmentJson } from "@connext/vector-types";
 
 dotEnvConfig();
 // console.log("config: ", process.env);
@@ -61,10 +62,8 @@ const retryWithdrawal = async (
   transferId: string,
   provider: providers.JsonRpcProvider
 ) => {
-  let commitment: {
-    channelAddress: string;
-    transactionHash: string;
-  };
+  let commitment: WithdrawCommitmentJson;
+
   try {
     const res = await axios.get(
       `${BASE_URL}/${ROUTER_IDENTIFIER}/withdraw/transfer/${transferId}`
@@ -94,6 +93,19 @@ const retryWithdrawal = async (
     // }
   } else {
     console.log("Commitment missing hash");
+  }
+
+  // Check if the commitment is single signed
+  if (!commitment.aliceSignature || !commitment.bobSignature) {
+    console.log("Flagging single-signed withdrawal.");
+    singleSignedTransfers.push({
+      transactionHash: commitment.transactionHash,
+      channelAddress: commitment.channelAddress,
+      transferId,
+      receipt,
+      error: "Withdrawal commitment single-signed",
+    });
+    return;
   }
 
   console.log(
