@@ -214,20 +214,36 @@ const handleRetries = async (
 
 // "/:publicIdentifier/withdraw/transfer/:transferId"
 const run = async () => {
-  for (let chainName of Object.keys(HANDLED_CHAINS)) {
-    const envVar = `${chainName.toUpperCase}_PROVIDER_URL`;
-    const provider = new providers.JsonRpcProvider(process.env[envVar]);
-    const chainId = HANDLED_CHAINS[chainName];
-    for (let option of HANDLED_OPTIONS) {
-      await handleRetries(
-        provider,
-        chainName,
-        chainId,
-        option.target,
-        option.status
-      );
-    }
-  }
+  await Promise.all(
+    Object.keys(HANDLED_CHAINS).map(async (chainName) => {
+      const envVar = `${chainName.toUpperCase}_PROVIDER_URL`;
+      const provider = new providers.JsonRpcProvider(process.env[envVar]);
+      const chainId = HANDLED_CHAINS[chainName];
+      for (let option of HANDLED_OPTIONS) {
+        await handleRetries(
+          provider,
+          chainName,
+          chainId,
+          option.target,
+          option.status
+        );
+      }
+    })
+  );
+  // for (let chainName of Object.keys(HANDLED_CHAINS)) {
+  //   const envVar = `${chainName.toUpperCase}_PROVIDER_URL`;
+  //   const provider = new providers.JsonRpcProvider(process.env[envVar]);
+  //   const chainId = HANDLED_CHAINS[chainName];
+  //   for (let option of HANDLED_OPTIONS) {
+  //     await handleRetries(
+  //       provider,
+  //       chainName,
+  //       chainId,
+  //       option.target,
+  //       option.status
+  //     );
+  //   }
+  // }
 };
 
 run();
