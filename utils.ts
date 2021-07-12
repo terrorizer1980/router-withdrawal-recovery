@@ -2,6 +2,8 @@ import * as fs from "fs";
 import { OUTPUT_DIR } from "./constants";
 import { TransferData } from "./types";
 import { safeJsonParse } from "@connext/vector-utils";
+import { BigNumber, constants, Contract, providers } from "ethers";
+import { ERC20Abi } from "@connext/vector-types";
 
 export function parseGenericQuery<T = object>(response: string): T[] {
   const records = response
@@ -38,7 +40,8 @@ export const parseStuckTransfersQuery = (response: string): TransferData[] => {
   // Check to see which is the transferId/channelAddress using regex matching.
   // This is to ensure if it's ever mixed up in the way postgres returns it,
   // we'll always handle it correctly./^/
-  const r = /\[ RECORD \d+ \]transferId\s+?\| (0x[a-fA-F0-9]{64})channelAddress\s+?\| (0x[a-fA-F0-9]{40})/g;
+  const r =
+    /\[ RECORD \d+ \]transferId\s+?\| (0x[a-fA-F0-9]{64})channelAddress\s+?\| (0x[a-fA-F0-9]{40})/g;
   response = response.replace(/\n/g, "");
   response = response.replace(/-/g, "");
   response = response.replace(/\+/g, "");
@@ -83,4 +86,14 @@ export const makeOutputDir = () => {
   } catch (err) {
     console.log(err);
   }
+};
+
+export const getOnchainBalance = async (
+  assetId: string,
+  address: string,
+  provider: providers.JsonRpcProvider
+): Promise<BigNumber> => {
+  return assetId === constants.AddressZero
+    ? await provider.getBalance(address)
+    : await new Contract(assetId, ERC20Abi, provider).balanceOf(address);
 };

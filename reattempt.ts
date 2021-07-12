@@ -10,7 +10,12 @@ import {
 } from "./constants";
 import { FlaggedTransfer, TransferData } from "./types";
 import { sendQuery, QUERY } from "./query";
-import { saveJsonFile, makeOutputDir, parseStuckTransfersQuery } from "./utils";
+import {
+  saveJsonFile,
+  makeOutputDir,
+  parseStuckTransfersQuery,
+  getOnchainBalance,
+} from "./utils";
 import { WithdrawCommitmentJson } from "@connext/vector-types";
 
 dotEnvConfig();
@@ -105,6 +110,17 @@ const retryWithdrawal = async (
       receipt,
       error: "Withdrawal commitment single-signed",
     });
+    return;
+  }
+
+  // Check the no-op case
+  const balance = await getOnchainBalance(
+    commitment.assetId,
+    channelAddress,
+    provider
+  );
+  if (balance.isZero() && commitment.callTo === constants.AddressZero) {
+    console.log(`Withdraw no-op`);
     return;
   }
 
