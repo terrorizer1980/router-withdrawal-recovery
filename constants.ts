@@ -61,14 +61,14 @@ export const HANDLED_OPTIONS: Option[] = [
     status: STATUS.UNMINED,
     target: TARGET.USER,
   },
-  // {
-  //   status: STATUS.UNSUBMITTED,
-  //   target: TARGET.ROUTER,
-  // },
-  // {
-  //   status: STATUS.UNSUBMITTED,
-  //   target: TARGET.USER,
-  // },
+  {
+    status: STATUS.UNSUBMITTED,
+    target: TARGET.ROUTER,
+  },
+  {
+    status: STATUS.UNSUBMITTED,
+    target: TARGET.USER,
+  },
 ];
 // Timeout in ms between withdrawal retry attempts.
 export const RETRY_PARITY = 1000;
