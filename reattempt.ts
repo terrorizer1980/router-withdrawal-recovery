@@ -198,14 +198,13 @@ const saveFlaggedTransfers = async (forCase: string) => {
 };
 
 const handleRetries = async (
+  transfers: TransferData[],
   provider: providers.JsonRpcProvider,
   chainName: string,
-  chainId: number,
   target: Values<typeof TARGET>,
   status: Values<typeof STATUS>
 ) => {
   // Retrieve all the stuck transfers related to this
-  const transfers = await retrieveStuckTransfers(chainId, target, status);
   const executionName = [chainName, status, target].join(".");
   const mark = Date.now();
   console.log(`\nSTART: ${executionName}`);
@@ -232,16 +231,39 @@ const handleRetries = async (
 
 // "/:publicIdentifier/withdraw/transfer/:transferId"
 const run = async () => {
+  // First pull all data up front for all chains
+  // do serially for better logging
+
+  // transfers[chainId][option.target][option.status]
+  const transfers = {};
+  for (const chainName of Object.keys(HANDLED_CHAINS)) {
+    const chainId = HANDLED_CHAINS[chainName];
+    let chainTotal = 0;
+    for (const option of HANDLED_OPTIONS) {
+      const retrieved = await retrieveStuckTransfers(
+        chainId,
+        option.target,
+        option.status
+      );
+      transfers[chainId][option.target][option.status] = retrieved;
+      chainTotal += retrieved.length;
+    }
+    console.log(`------------------`);
+    console.log(`Completed retrieval for all options`);
+    console.log(`Retrieved ${chainTotal} stuck transfers on ${chainName}`);
+    console.log(`------------------`);
+  }
+
+  // Handle the retries for all chains
   await Promise.all(
     Object.keys(HANDLED_CHAINS).map(async (chainName) => {
       const envVar = `${chainName.toUpperCase}_PROVIDER_URL`;
       const provider = new providers.JsonRpcProvider(process.env[envVar]);
-      const chainId = HANDLED_CHAINS[chainName];
       for (let option of HANDLED_OPTIONS) {
         await handleRetries(
+          transfers[option.target][option.status] ?? [],
           provider,
           chainName,
-          chainId,
           option.target,
           option.status
         );
