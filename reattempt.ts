@@ -7,6 +7,8 @@ import {
   BASE_URL,
   HANDLED_OPTIONS,
   RETRY_PARITY,
+  TARGET,
+  STATUS,
 } from "./constants";
 import { FlaggedTransfer, TransferData } from "./types";
 import { sendQuery, QUERY } from "./query";
@@ -16,7 +18,7 @@ import {
   parseStuckTransfersQuery,
   getOnchainBalance,
 } from "./utils";
-import { WithdrawCommitmentJson } from "@connext/vector-types";
+import { Values, WithdrawCommitmentJson } from "@connext/vector-types";
 
 dotEnvConfig();
 // console.log("config: ", process.env);
@@ -51,8 +53,8 @@ const logAxiosError = (error: any) => {
 
 const retrieveStuckTransfers = async (
   chainId: number,
-  target: string,
-  status: string
+  target: Values<typeof TARGET>,
+  status: Values<typeof STATUS>
 ): Promise<TransferData[]> => {
   console.log(
     `Retrieving stuck transfers for ${target}, ${status}, on chain ${chainId}`
@@ -199,11 +201,11 @@ const handleRetries = async (
   provider: providers.JsonRpcProvider,
   chainName: string,
   chainId: number,
-  status: string,
-  target: string
+  target: Values<typeof TARGET>,
+  status: Values<typeof STATUS>
 ) => {
   // Retrieve all the stuck transfers related to this
-  const transfers = await retrieveStuckTransfers(chainId, status, target);
+  const transfers = await retrieveStuckTransfers(chainId, target, status);
   const executionName = [chainName, status, target].join(".");
   const mark = Date.now();
   console.log(`\nSTART: ${executionName}`);

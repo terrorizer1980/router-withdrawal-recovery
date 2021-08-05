@@ -1,3 +1,4 @@
+import { Values } from "@connext/vector-types";
 import { Option } from "./types";
 
 // Directory where we store output files, like flagged transfers, etc.
@@ -9,12 +10,12 @@ export const BASE_URL = "http://localhost:8002";
 export const STATUS = {
   UNSUBMITTED: "unsubmitted",
   UNMINED: "unmined",
-};
+} as const;
 
 export const TARGET = {
   USER: "user",
   ROUTER: "router",
-};
+} as const;
 
 // Chains we handle, for convenient iteration.
 export const HANDLED_CHAINS = {
