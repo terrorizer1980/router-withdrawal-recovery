@@ -257,13 +257,13 @@ const run = async () => {
     const chainId = HANDLED_CHAINS[chainName];
     let chainTotal = 0;
     for (const option of HANDLED_OPTIONS) {
-      transfers[chainId] = { [option.target]: { [option.status]: [] } };
+      transfers[chainName] = { [option.target]: { [option.status]: [] } };
       const retrieved = await retrieveStuckTransfers(
         chainId,
         option.target,
         option.status
       );
-      transfers[chainId][option.target][option.status] = retrieved;
+      transfers[chainName][option.target][option.status] = retrieved;
       chainTotal += retrieved.length;
     }
     console.log(`------------------`);
@@ -280,7 +280,8 @@ const run = async () => {
       let totalFailed = 0;
       let totalRetried = 0;
       for (let option of HANDLED_OPTIONS) {
-        const toRetry = transfers[option.target][option.status] ?? [];
+        const toRetry =
+          transfers[chainName][option.target][option.status] ?? [];
         totalRetried += toRetry.length;
         const optFailed = await handleRetries(
           toRetry,
