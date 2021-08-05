@@ -207,12 +207,22 @@ const handleRetries = async (
 ) => {
   // Retrieve all the stuck transfers related to this
   const executionName = [chainName, status, target].join(".");
+
+  // Check provider
+  try {
+    await provider.getBlockNumber();
+  } catch (e) {
+    console.error(`[${chainName}] Provider borked`);
+    return;
+  }
+
   const mark = Date.now();
   console.log(`\nSTART: ${executionName}`);
   let count = 1;
   for (let transfer of transfers) {
     console.log(`\n${count} / ${transfers.length}`);
     count += 1;
+
     try {
       await retryWithdrawal(
         transfer.channelAddress,
@@ -220,7 +230,7 @@ const handleRetries = async (
         provider
       );
     } catch (e) {
-      console.error("retryWithdrawal Error:", e);
+      console.error(`[${executionName}] retryWithdrawal Error:`, e);
     }
     await new Promise<void>((res) => setTimeout(() => res(), RETRY_PARITY));
   }
