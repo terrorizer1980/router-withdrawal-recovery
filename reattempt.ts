@@ -94,10 +94,11 @@ const retryWithdrawal = async (
     if (commitment.transactionHash === constants.HashZero) {
       return;
     }
-    // receipt = await provider.getTransactionReceipt(commitment.transactionHash);
-    // if (receipt) {
-    //   console.log("Tx receipt available", transferId);
-    // }
+    receipt = await provider.getTransactionReceipt(commitment.transactionHash);
+    if (receipt) {
+      console.log("Tx receipt available", transferId);
+      return;
+    }
   } else {
     console.log("Commitment missing hash");
   }
