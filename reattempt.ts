@@ -251,6 +251,7 @@ const run = async () => {
     const chainId = HANDLED_CHAINS[chainName];
     let chainTotal = 0;
     for (const option of HANDLED_OPTIONS) {
+      transfers[chainId] = { [option.target]: { [option.status]: [] } };
       const retrieved = await retrieveStuckTransfers(
         chainId,
         option.target,
