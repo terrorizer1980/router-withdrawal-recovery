@@ -198,13 +198,14 @@ const saveFlaggedTransfers = async (forCase: string) => {
   singleSignedTransfers = [];
 };
 
+// Returns number of failed transactions
 const handleRetries = async (
   transfers: TransferData[],
   provider: providers.JsonRpcProvider,
   chainName: string,
   target: Values<typeof TARGET>,
   status: Values<typeof STATUS>
-) => {
+): Promise<number> => {
   // Retrieve all the stuck transfers related to this
   const executionName = [chainName, status, target].join(".");
 
@@ -219,6 +220,7 @@ const handleRetries = async (
   const mark = Date.now();
   console.log(`\nSTART: ${executionName}`);
   let count = 1;
+  let failed = 0;
   for (let transfer of transfers) {
     console.log(`\n${count} / ${transfers.length}`);
     count += 1;
@@ -230,14 +232,18 @@ const handleRetries = async (
         provider
       );
     } catch (e) {
+      failed += 1;
       console.error(`[${executionName}] retryWithdrawal Error:`, e);
     }
     await new Promise<void>((res) => setTimeout(() => res(), RETRY_PARITY));
   }
   saveFlaggedTransfers(executionName);
   console.log(
-    `\nFINISHED: ${executionName}. Execution time ${Date.now() - mark}ms.`
+    `\nFINISHED: ${executionName}. Execution time ${
+      Date.now() - mark
+    }ms. ${failed}/${transfers.length} failed`
   );
+  return failed;
 };
 
 // "/:publicIdentifier/withdraw/transfer/:transferId"
@@ -271,15 +277,25 @@ const run = async () => {
     Object.keys(HANDLED_CHAINS).map(async (chainName) => {
       const envVar = `${chainName.toUpperCase}_PROVIDER_URL`;
       const provider = new providers.JsonRpcProvider(process.env[envVar]);
+      let totalFailed = 0;
+      let totalRetried = 0;
       for (let option of HANDLED_OPTIONS) {
-        await handleRetries(
-          transfers[option.target][option.status] ?? [],
+        const toRetry = transfers[option.target][option.status] ?? [];
+        totalRetried += toRetry.length;
+        const optFailed = await handleRetries(
+          toRetry,
           provider,
           chainName,
           option.target,
           option.status
         );
+        totalFailed += optFailed;
       }
+      console.log(`------------------`);
+      console.log(
+        `Completed retrying for ${chainName}. ${totalFailed} / ${totalRetried} failed.`
+      );
+      console.log(`------------------`);
     })
   );
   // for (let chainName of Object.keys(HANDLED_CHAINS)) {
