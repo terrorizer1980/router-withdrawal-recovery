@@ -224,7 +224,7 @@ const handleRetries = async (
   let count = 1;
   let failed = 0;
   for (let transfer of transfers) {
-    console.log(`\n${count} / ${transfers.length}`);
+    console.log(`\n[${chainName}] ${count} / ${transfers.length}`);
     count += 1;
 
     try {
