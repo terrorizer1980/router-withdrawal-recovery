@@ -204,11 +204,12 @@ const saveFlaggedTransfers = async (forCase: string) => {
   singleSignedTransfers = [];
 };
 
-const convertToUsd = (wei: string, assetId: string) => {
+const convertToUsd = (wei: string, assetId: string, chainName: string) => {
   let { decimals, price } = ASSET_MAP[utils.getAddress(assetId)] ?? {};
   if (!decimals) {
-    console.log(`No decimals found for ${assetId}, using 18`);
+    console.log(`No decimals found for ${assetId} on ${chainName}, using 18`);
     decimals = 18;
+    price = 1;
   }
   const usd = utils.formatUnits(BigNumber.from(wei).mul(price), decimals);
   return +usd;
@@ -247,6 +248,7 @@ const handleRetries = async (
         unretrievedAmount += convertToUsd(
           commitment.amount,
           commitment.assetId
+          chainName,
         );
       }
     } catch (e) {
@@ -254,7 +256,8 @@ const handleRetries = async (
       if (commitment) {
         unretrievedAmount += convertToUsd(
           commitment.amount,
-          commitment.assetId
+          commitment.assetId,
+          chainName
         );
         console.error(`[${executionName}] failed to get usd amount`);
       }
@@ -306,7 +309,7 @@ const run = async () => {
       try {
         await provider.getBlockNumber();
       } catch (e) {
-        console.error(`[${chainName}] Provider borked: ${envVar}`);
+        console.error(`[${chainName}] Provider borked: ${process.env[envVar]}`);
         return;
       }
 
