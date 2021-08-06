@@ -279,6 +279,7 @@ const run = async () => {
   // First pull all data up front for all chains
   // do serially for better logging
 
+  const logs: string[] = []
   const transfers = {};
   for (const chainName of Object.keys(HANDLED_CHAINS)) {
     const chainId = HANDLED_CHAINS[chainName];
@@ -332,10 +333,10 @@ const run = async () => {
         totalFailed += failed;
         totalUnretrieved += unretrievedAmount;
       }
+      const msg = `Completed retrying for ${chainName}. ${totalFailed} / ${totalRetried} failed. ${totalUnretrieved}`
+      logs.push(msg)
       console.log(`------------------`);
-      console.log(
-        `Completed retrying for ${chainName}. ${totalFailed} / ${totalRetried} failed. ${totalUnretrieved}`
-      );
+      console.log(msg;
       console.log(`------------------`);
     })
   );
@@ -353,6 +354,12 @@ const run = async () => {
   //     );
   //   }
   // }
+
+
+  console.log(`\n----------------------`);
+  console.log(`Completed all chains. Summary:`)
+  logs.map(msg => console.log(msg + '\n'))
+  console.log(`\n----------------------`);
 };
 
 run();
