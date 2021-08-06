@@ -218,7 +218,7 @@ const handleRetries = async (
   }
 
   const mark = Date.now();
-  console.log(`\nSTART: ${executionName}`);
+  console.log(`\nSTART: ${executionName} - ${transfers.length} transfers`);
   let count = 1;
   let failed = 0;
   for (let transfer of transfers) {
@@ -251,7 +251,6 @@ const run = async () => {
   // First pull all data up front for all chains
   // do serially for better logging
 
-  // transfers[chainId][option.target][option.status]
   const transfers = {};
   for (const chainName of Object.keys(HANDLED_CHAINS)) {
     const chainId = HANDLED_CHAINS[chainName];
@@ -263,7 +262,8 @@ const run = async () => {
         option.target,
         option.status
       );
-      transfers[chainName][option.target][option.status] = retrieved;
+      const key = [chainName, option.target, option.status].join("-");
+      transfers[key] = retrieved;
       chainTotal += retrieved.length;
     }
     console.log(`------------------`);
@@ -272,16 +272,18 @@ const run = async () => {
     console.log(`------------------`);
   }
 
+  console.log("test", Object.keys(transfers));
+
   // Handle the retries for all chains
   await Promise.all(
     Object.keys(HANDLED_CHAINS).map(async (chainName) => {
-      const envVar = `${chainName.toUpperCase}_PROVIDER_URL`;
+      const envVar = `${chainName.toUpperCase()}_PROVIDER_URL`;
       const provider = new providers.JsonRpcProvider(process.env[envVar]);
       let totalFailed = 0;
       let totalRetried = 0;
       for (let option of HANDLED_OPTIONS) {
-        const toRetry =
-          transfers[chainName][option.target][option.status] ?? [];
+        const key = [chainName, option.target, option.status].join("-");
+        const toRetry = transfers[key] ?? [];
         totalRetried += toRetry.length;
         const optFailed = await handleRetries(
           toRetry,
