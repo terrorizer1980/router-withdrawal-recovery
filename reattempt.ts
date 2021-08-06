@@ -1,5 +1,5 @@
 import axios from "axios";
-import { constants, providers } from "ethers";
+import { BigNumber, constants, providers, utils } from "ethers";
 import { config as dotEnvConfig } from "dotenv";
 import {
   HANDLED_CHAINS,
@@ -9,6 +9,7 @@ import {
   RETRY_PARITY,
   TARGET,
   STATUS,
+  ASSET_MAP,
 } from "./constants";
 import { FlaggedTransfer, TransferData } from "./types";
 import { sendQuery, QUERY } from "./query";
@@ -69,7 +70,10 @@ const retryWithdrawal = async (
   channelAddress: string,
   transferId: string,
   provider: providers.JsonRpcProvider
-): Promise<boolean> => {
+): Promise<{
+  commitment: WithdrawCommitmentJson | undefined;
+  successful: boolean;
+}> => {
   let commitment: WithdrawCommitmentJson;
 
   try {
@@ -80,7 +84,7 @@ const retryWithdrawal = async (
   } catch (e) {
     console.log("Error fetching transfer", transferId);
     logAxiosError(e);
-    return false;
+    return { commitment, successful: false };
   }
   console.log(
     `Checking withdrawal: ${transferId} for channel ${commitment.channelAddress}`
@@ -93,12 +97,12 @@ const retryWithdrawal = async (
       commitment.transactionHash
     );
     if (commitment.transactionHash === constants.HashZero) {
-      return true;
+      return { commitment, successful: true };
     }
     receipt = await provider.getTransactionReceipt(commitment.transactionHash);
     if (receipt) {
       console.log("Tx receipt available", transferId);
-      return true;
+      return { commitment, successful: true };
     }
   } else {
     console.log("Commitment missing hash");
@@ -114,7 +118,7 @@ const retryWithdrawal = async (
       receipt,
       error: "Withdrawal commitment single-signed",
     });
-    return false;
+    return { commitment, successful: false };
   }
 
   // Check the no-op case
@@ -125,7 +129,7 @@ const retryWithdrawal = async (
   );
   if (balance.isZero() && commitment.callTo === constants.AddressZero) {
     console.log(`Withdraw no-op`);
-    return false;
+    return { commitment, successful: false };
   }
 
   console.log(
@@ -141,7 +145,7 @@ const retryWithdrawal = async (
       ...res.data,
       channelAddress: commitment.channelAddress,
     });
-    return true;
+    return { commitment, successful: true };
   } catch (error) {
     console.log(`Error on transfer: ${transferId}`);
     if (
@@ -173,7 +177,7 @@ const retryWithdrawal = async (
       });
     }
     logAxiosError(error);
-    return false;
+    return { commitment, successful: false };
   }
 };
 
@@ -200,6 +204,16 @@ const saveFlaggedTransfers = async (forCase: string) => {
   singleSignedTransfers = [];
 };
 
+const convertToUsd = (wei: string, assetId: string) => {
+  let { decimals, price } = ASSET_MAP[utils.getAddress(assetId)] ?? {};
+  if (!decimals) {
+    console.log(`No decimals found for ${assetId}, using 18`);
+    decimals = 18;
+  }
+  const usd = utils.formatUnits(BigNumber.from(wei).mul(price), decimals);
+  return +usd;
+};
+
 // Returns number of failed transactions
 const handleRetries = async (
   transfers: TransferData[],
@@ -207,37 +221,43 @@ const handleRetries = async (
   chainName: string,
   target: Values<typeof TARGET>,
   status: Values<typeof STATUS>
-): Promise<number> => {
+): Promise<{ failed: number; unretrievedAmount: number }> => {
   // Retrieve all the stuck transfers related to this
   const executionName = [chainName, status, target].join(".");
-
-  // Check provider
-  try {
-    await provider.getBlockNumber();
-  } catch (e) {
-    console.error(`[${chainName}] Provider borked`);
-    return;
-  }
 
   const mark = Date.now();
   console.log(`\nSTART: ${executionName} - ${transfers.length} transfers`);
   let count = 1;
   let failed = 0;
+  let unretrievedAmount = 0;
   for (let transfer of transfers) {
     console.log(`\n[${chainName}] ${count} / ${transfers.length}`);
     count += 1;
+    let commitment;
 
     try {
-      const success = await retryWithdrawal(
+      const retryResult = await retryWithdrawal(
         transfer.channelAddress,
         transfer.transferId,
         provider
       );
-      if (!success) {
+      commitment = retryResult.commitment;
+      if (!retryResult.successful) {
         failed += 1;
+        unretrievedAmount += convertToUsd(
+          commitment.amount,
+          commitment.assetId
+        );
       }
     } catch (e) {
       failed += 1;
+      if (commitment) {
+        unretrievedAmount += convertToUsd(
+          commitment.amount,
+          commitment.assetId
+        );
+        console.error(`[${executionName}] failed to get usd amount`);
+      }
       console.error(`[${executionName}] retryWithdrawal Error:`, e);
     }
     await new Promise<void>((res) => setTimeout(() => res(), RETRY_PARITY));
@@ -248,7 +268,7 @@ const handleRetries = async (
       Date.now() - mark
     }ms. ${failed}/${transfers.length} failed`
   );
-  return failed;
+  return { failed, unretrievedAmount };
 };
 
 // "/:publicIdentifier/withdraw/transfer/:transferId"
@@ -281,24 +301,35 @@ const run = async () => {
     Object.keys(HANDLED_CHAINS).map(async (chainName) => {
       const envVar = `${chainName.toUpperCase()}_PROVIDER_URL`;
       const provider = new providers.JsonRpcProvider(process.env[envVar]);
+
+      // Check provider
+      try {
+        await provider.getBlockNumber();
+      } catch (e) {
+        console.error(`[${chainName}] Provider borked: ${envVar}`);
+        return;
+      }
+
       let totalFailed = 0;
       let totalRetried = 0;
+      let totalUnretrieved = 0;
       for (let option of HANDLED_OPTIONS) {
         const key = [chainName, option.target, option.status].join("-");
         const toRetry = transfers[key] ?? [];
         totalRetried += toRetry.length;
-        const optFailed = await handleRetries(
+        const { failed, unretrievedAmount } = await handleRetries(
           toRetry,
           provider,
           chainName,
           option.target,
           option.status
         );
-        totalFailed += optFailed;
+        totalFailed += failed;
+        totalUnretrieved += unretrievedAmount;
       }
       console.log(`------------------`);
       console.log(
-        `Completed retrying for ${chainName}. ${totalFailed} / ${totalRetried} failed.`
+        `Completed retrying for ${chainName}. ${totalFailed} / ${totalRetried} failed. ${totalUnretrieved}`
       );
       console.log(`------------------`);
     })
