@@ -64,11 +64,12 @@ const retrieveStuckTransfers = async (
   return parseStuckTransfersQuery(response);
 };
 
+// Returns true if it worked / isnt needed
 const retryWithdrawal = async (
   channelAddress: string,
   transferId: string,
   provider: providers.JsonRpcProvider
-) => {
+): Promise<boolean> => {
   let commitment: WithdrawCommitmentJson;
 
   try {
@@ -79,7 +80,7 @@ const retryWithdrawal = async (
   } catch (e) {
     console.log("Error fetching transfer", transferId);
     logAxiosError(e);
-    return;
+    return false;
   }
   console.log(
     `Checking withdrawal: ${transferId} for channel ${commitment.channelAddress}`
@@ -92,12 +93,12 @@ const retryWithdrawal = async (
       commitment.transactionHash
     );
     if (commitment.transactionHash === constants.HashZero) {
-      return;
+      return true;
     }
     receipt = await provider.getTransactionReceipt(commitment.transactionHash);
     if (receipt) {
       console.log("Tx receipt available", transferId);
-      return;
+      return true;
     }
   } else {
     console.log("Commitment missing hash");
@@ -113,7 +114,7 @@ const retryWithdrawal = async (
       receipt,
       error: "Withdrawal commitment single-signed",
     });
-    return;
+    return false;
   }
 
   // Check the no-op case
@@ -124,7 +125,7 @@ const retryWithdrawal = async (
   );
   if (balance.isZero() && commitment.callTo === constants.AddressZero) {
     console.log(`Withdraw no-op`);
-    return;
+    return false;
   }
 
   console.log(
@@ -140,6 +141,7 @@ const retryWithdrawal = async (
       ...res.data,
       channelAddress: commitment.channelAddress,
     });
+    return true;
   } catch (error) {
     console.log(`Error on transfer: ${transferId}`);
     if (
@@ -160,7 +162,6 @@ const retryWithdrawal = async (
     ) {
       // TODO: Handle this case: we need to update DB / offchain state.
       console.log("Withdrawal transaction found.");
-      return;
     } else {
       console.log(`Flagging transfer for error ${error.response.data.message}`);
       flaggedTransfers.push({
@@ -172,6 +173,7 @@ const retryWithdrawal = async (
       });
     }
     logAxiosError(error);
+    return false;
   }
 };
 
@@ -226,11 +228,14 @@ const handleRetries = async (
     count += 1;
 
     try {
-      await retryWithdrawal(
+      const success = await retryWithdrawal(
         transfer.channelAddress,
         transfer.transferId,
         provider
       );
+      if (!success) {
+        failed += 1;
+      }
     } catch (e) {
       failed += 1;
       console.error(`[${executionName}] retryWithdrawal Error:`, e);
