@@ -247,8 +247,8 @@ const handleRetries = async (
         failed += 1;
         unretrievedAmount += convertToUsd(
           commitment.amount,
-          commitment.assetId
-          chainName,
+          commitment.assetId,
+          chainName
         );
       }
     } catch (e) {
