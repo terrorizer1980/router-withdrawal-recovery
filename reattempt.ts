@@ -271,13 +271,10 @@ const run = async () => {
     console.log(`------------------`);
   }
 
-  console.log("test", Object.keys(transfers));
-
   // Handle the retries for all chains
   await Promise.all(
     Object.keys(HANDLED_CHAINS).map(async (chainName) => {
       const envVar = `${chainName.toUpperCase()}_PROVIDER_URL`;
-      console.log("envVar", envVar);
       const provider = new providers.JsonRpcProvider(process.env[envVar]);
       let totalFailed = 0;
       let totalRetried = 0;
