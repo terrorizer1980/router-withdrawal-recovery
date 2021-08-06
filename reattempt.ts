@@ -309,7 +309,9 @@ const run = async () => {
       try {
         await provider.getBlockNumber();
       } catch (e) {
-        console.error(`[${chainName}] Provider borked: ${process.env[envVar]}`);
+        console.error(
+          `[${chainName}] Provider borked: ${process.env[envVar]}. Error: ${e.message}`
+        );
         return;
       }
 
