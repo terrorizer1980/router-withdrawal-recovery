@@ -38,6 +38,7 @@ const asset = (token: string, decimals: number, price: number = 1): Asset => ({
 });
 
 export const ASSET_MAP: { [tokenAddr: string]: Asset } = {
+  ""
   "0x55d398326f99059fF775485246999027B3197955": asset("B-USDT", 18),
   "0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174": asset("P-USDC", 6),
   "0xc2132D05D31c914a87C6611C10748AEb04B58e8F": asset("P-USDT", 6),
