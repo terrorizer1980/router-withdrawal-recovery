@@ -1,4 +1,7 @@
 import { Option } from "./types";
+import { config as dotEnvConfig } from "dotenv";
+
+dotEnvConfig();
 
 // Directory where we store output files, like flagged transfers, etc.
 export const OUTPUT_DIR = "output";
