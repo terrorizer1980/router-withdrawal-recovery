@@ -245,11 +245,15 @@ const handleRetries = async (
       commitment = retryResult.commitment;
       if (!retryResult.successful) {
         failed += 1;
-        unretrievedAmount += convertToUsd(
-          commitment.amount,
-          commitment.assetId,
-          chainName
-        );
+        if (commitment) {
+          unretrievedAmount += convertToUsd(
+            commitment.amount,
+            commitment.assetId,
+            chainName
+          );
+        } else {
+          console.error(`[${executionName}] no commitment found`);
+        }
       }
     } catch (e) {
       failed += 1;

@@ -1,9 +1,9 @@
-import { Values } from "@connext/vector-types";
 import { Option } from "./types";
 
 // Directory where we store output files, like flagged transfers, etc.
 export const OUTPUT_DIR = "output";
 export const ROUTER_IDENTIFIER =
+  process.env.ROUTER_IDENTIFIER ??
   "vector52rjrwRFUkaJai2J4TrngZ6doTUXGZhizHmrZ6J15xVv4YFgFC";
 export const BASE_URL = "http://localhost:8002";
 
