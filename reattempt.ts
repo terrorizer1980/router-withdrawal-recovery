@@ -129,6 +129,13 @@ const retryWithdrawal = async (
   );
   if (balance.isZero() && commitment.callTo === constants.AddressZero) {
     console.log(`Withdraw no-op`);
+    flaggedTransfers.push({
+      transactionHash: commitment.transactionHash,
+      channelAddress: commitment.channelAddress,
+      transferId,
+      receipt,
+      error: `Withdraw no-op`,
+    });
     return { commitment, successful: false };
   }
 
